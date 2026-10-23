@@ -8,8 +8,6 @@ import Lenis from "lenis"
  */
 let lenis: Lenis | null = null
 
-const NAV_OFFSET = -96
-
 export function startSmoothScroll(): () => void {
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches
   if (reduced || lenis) return () => {}
@@ -17,7 +15,10 @@ export function startSmoothScroll(): () => void {
   lenis = new Lenis({
     duration: 1.1,
     easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-    anchors: { offset: NAV_OFFSET },
+    // Lenis already honours each target's CSS scroll-margin-top (the
+    // sections' scroll-mt-*), so no extra offset here — adding one would
+    // count the nav clearance twice.
+    anchors: true,
   })
 
   let frame = 0
@@ -34,10 +35,9 @@ export function startSmoothScroll(): () => void {
   }
 }
 
-export function scrollToTarget(target: HTMLElement | number | string, opts: { offset?: number } = {}) {
+export function scrollToTarget(target: HTMLElement | number | string) {
   if (lenis) {
-    const offset = typeof target === "number" ? 0 : (opts.offset ?? NAV_OFFSET)
-    lenis.scrollTo(target, { offset })
+    lenis.scrollTo(target)
     return
   }
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches

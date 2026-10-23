@@ -10,7 +10,7 @@ export function FinalCta() {
   const formRef = useRef<HTMLDivElement>(null)
 
   function scrollToForm() {
-    if (formRef.current) scrollToTarget(formRef.current, { offset: -112 })
+    if (formRef.current) scrollToTarget(formRef.current)
     window.setTimeout(() => {
       // preventScroll: the eased scroll above is already taking us there
       formRef.current?.querySelector<HTMLInputElement>("#name")?.focus({ preventScroll: true })
