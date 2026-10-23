@@ -5,6 +5,8 @@ import { projects, type Project } from "../data/projects"
 import { WindowChrome } from "../components/WindowChrome"
 import { TypedText } from "../animations/TypedText"
 import { SectionLabel } from "../components/SectionLabel"
+import { TiltCard } from "../animations/TiltCard"
+import { scrollToTarget } from "../lib/scroll"
 
 const TAB_TINTS = ["", "mix-blend-multiply bg-accent/15", "mix-blend-multiply bg-amber/15"]
 const PROJECT_COUNT = projects.length
@@ -125,7 +127,7 @@ export function SelectedWork() {
     const rect = track.getBoundingClientRect()
     const trackTop = window.scrollY + rect.top
     const fraction = (i + 0.5) / PROJECT_COUNT
-    window.scrollTo({ top: trackTop + fraction * pinRange, behavior: prefersReducedMotion ? "auto" : "smooth" })
+    scrollToTarget(trackTop + fraction * pinRange)
   }
 
   const prevProject = projects[(activeIndex - 1 + PROJECT_COUNT) % PROJECT_COUNT]
@@ -221,9 +223,11 @@ export function SelectedWork() {
                     }
                     className="absolute inset-0 z-10 flex items-center justify-center p-4 sm:p-6"
                   >
-                    <div className="w-full max-w-[560px]">
-                      <ProjectWindow project={active} dominant />
-                    </div>
+                    <TiltCard className="w-full max-w-[560px]">
+                      <div className="shadow-[0_30px_70px_-20px_rgba(0,0,0,0.7)]">
+                        <ProjectWindow project={active} dominant />
+                      </div>
+                    </TiltCard>
                   </motion.div>
                 </AnimatePresence>
 

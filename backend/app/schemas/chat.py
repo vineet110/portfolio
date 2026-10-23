@@ -16,6 +16,9 @@ class ChatRequest(BaseModel):
     # Conversation history is kept on the frontend (V1) and sent along only
     # as needed for LLM context — never persisted server-side.
     history: list[ChatMessage] | None = Field(default=None, max_length=20)
+    # When true, the answer is streamed back as server-sent events instead
+    # of a single JSON body (see routes/chat.py).
+    stream: bool = False
 
 
 class ChatResponse(BaseModel):

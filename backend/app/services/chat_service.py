@@ -12,6 +12,7 @@ Never raises — a chat failure must never crash the request.
 
 import logging
 import re
+from collections.abc import Iterator
 
 from app.core.config import Settings, get_settings
 from app.schemas.chat import ChatMessage
@@ -146,3 +147,46 @@ def answer_question(
         return _compose_knowledge_answer(matches), "knowledge"
 
     return FALLBACK_MESSAGE, "fallback"
+
+
+def stream_answer(
+    message: str,
+    history: list[ChatMessage] | None = None,
+    settings: Settings | None = None,
+) -> Iterator[dict]:
+    """Streaming variant of `answer_question()`. Yields `{"delta": text}`
+    events while the LLM generates, then exactly one final
+    `{"done": True, "answer": ..., "source": ...}` event carrying the
+    complete, plain-text answer (clients should show that one as final).
+
+    If the LLM fails before producing anything, falls back exactly like
+    `answer_question()`; if it fails mid-answer, the partial answer is
+    finished as-is rather than discarded. Never raises."""
+    settings = settings or get_settings()
+    if llm_service.is_configured(settings):
+        parts: list[str] = []
+        try:
+            for piece in llm_service.ask_stream(
+                settings,
+                system_prompt=_build_system_prompt(_retrieve_context(message, history)),
+                message=message,
+                history=_format_history(history, message),
+            ):
+                parts.append(piece)
+                yield {"delta": piece}
+        except Exception:
+            logger.exception("Streaming LLM call failed; answering from studio knowledge or the safe fallback instead.")
+        answer = _to_plain_text("".join(parts))
+        if answer:
+            yield {"done": True, "answer": answer, "source": "llm"}
+            return
+
+    try:
+        matches = knowledge_service.retrieve(message)
+    except Exception:
+        logger.exception("Knowledge retrieval failed during a streamed chat request.")
+        matches = []
+    if matches:
+        yield {"done": True, "answer": _compose_knowledge_answer(matches), "source": "knowledge"}
+    else:
+        yield {"done": True, "answer": FALLBACK_MESSAGE, "source": "fallback"}

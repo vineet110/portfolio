@@ -4,11 +4,18 @@ import { ArrowUpRight, ChevronRight } from "lucide-react"
 import { services } from "../data/services"
 import { SectionLabel } from "../components/SectionLabel"
 import { TypedText } from "../animations/TypedText"
+import { Spotlight } from "../components/Spotlight"
 
 const STYLES = {
   accent: { text: "text-accent", bar: "bg-accent", tint: "bg-accent/15" },
   amber: { text: "text-amber", bar: "bg-amber", tint: "bg-amber/15" },
   mono: { text: "text-ink", bar: "bg-ink-dim", tint: "bg-ink/10" },
+} as const
+
+const SPOT_COLORS = {
+  accent: "rgba(124, 92, 255, 0.12)",
+  amber: "rgba(255, 176, 32, 0.09)",
+  mono: "rgba(243, 240, 234, 0.07)",
 } as const
 
 function ServiceModule({
@@ -23,13 +30,13 @@ function ServiceModule({
   const style = STYLES[service.color]
 
   return (
-    <div className="border-b border-border first:border-t">
+    <Spotlight className="border-b border-border first:border-t" color={SPOT_COLORS[service.color]}>
       <button
         type="button"
         data-testid={`service-toggle-${service.id}`}
         onClick={onToggle}
         aria-expanded={isOpen}
-        className="flex w-full items-center gap-4 py-6 text-left transition-colors md:gap-6 md:py-8"
+        className="group relative flex w-full items-center gap-4 py-6 text-left transition-colors md:gap-6 md:py-8"
       >
         <ChevronRight
           size={16}
@@ -39,7 +46,7 @@ function ServiceModule({
           <span className={`block font-mono text-[11px] uppercase tracking-[0.1em] ${isOpen ? style.text : "text-ink-faint"}`}>
             $ service --{service.id}
           </span>
-          <h3 className="font-display mt-1 text-2xl font-bold tracking-tight text-ink sm:text-3xl md:text-4xl">
+          <h3 className="font-display mt-1 text-2xl font-bold tracking-tight text-ink transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-2 sm:text-3xl md:text-4xl">
             {service.name}
           </h3>
         </div>
@@ -53,7 +60,7 @@ function ServiceModule({
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-            className="overflow-hidden"
+            className="relative overflow-hidden"
             data-testid={`service-detail-${service.id}`}
           >
             <div className="grid grid-cols-1 gap-8 pb-10 md:grid-cols-12 md:gap-10 md:pl-10">
@@ -69,15 +76,20 @@ function ServiceModule({
                   ))}
                 </ul>
               </div>
-              <div className="relative aspect-[16/10] overflow-hidden md:col-span-6">
-                <img src={service.image.src} alt={service.image.alt} className="h-full w-full object-cover" loading="lazy" />
+              <div className="group/img relative aspect-[16/10] overflow-hidden md:col-span-6">
+                <img
+                  src={service.image.src}
+                  alt={service.image.alt}
+                  className="h-full w-full object-cover transition-transform duration-[1.2s] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover/img:scale-105"
+                  loading="lazy"
+                />
                 <div className={`absolute inset-0 mix-blend-multiply ${style.tint}`} />
               </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </Spotlight>
   )
 }
 

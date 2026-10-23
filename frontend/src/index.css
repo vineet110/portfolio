@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "lenis/dist/lenis.css";
 
 @theme {
   --font-display: "Archivo", "Inter", system-ui, sans-serif;
@@ -184,4 +185,47 @@ body::after {
     animation: none;
     opacity: 1;
   }
+}
+
+/* Hero dot grid — a faint field everywhere, a brighter accent field
+   revealed only around the pointer (see components/Spotlight.tsx DotGrid). */
+.dot-grid-base {
+  background-image: radial-gradient(rgba(243, 240, 234, 0.09) 1px, transparent 1px);
+  background-size: 28px 28px;
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, #000 30%, transparent 80%);
+}
+.dot-grid-lit {
+  background-image: radial-gradient(rgba(124, 92, 255, 0.85) 1.2px, transparent 1.2px);
+  background-size: 28px 28px;
+  opacity: var(--spot-o, 0);
+  mask-image: radial-gradient(220px circle at var(--spot-x, 50%) var(--spot-y, 50%), #000, transparent 75%);
+}
+
+/* Animated gradient text for a single emphasis word — slow, subtle sheen. */
+@keyframes sheen {
+  from {
+    background-position: 0% 50%;
+  }
+  to {
+    background-position: 200% 50%;
+  }
+}
+.text-sheen {
+  background-image: linear-gradient(100deg, var(--color-accent) 0%, #b9a6ff 25%, var(--color-amber) 50%, #b9a6ff 75%, var(--color-accent) 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: sheen 6s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .text-sheen {
+    animation: none;
+  }
+}
+
+/* Outlined display type (footer wordmark) */
+.text-outline {
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(166, 161, 179, 0.28);
 }

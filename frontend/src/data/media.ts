@@ -30,27 +30,27 @@ export const media = {
    */
   projects: {
     aiWorkspace: {
-      src: local("project-ai-workspace.jpg"),
+      src: local("project-ai-workspace.webp"),
       source: "Unsplash" as const,
       alt: "Macro detail of a computer circuit board representing an intelligent systems interface",
     },
     maison: {
-      src: local("project-maison.jpg"),
+      src: local("project-maison.webp"),
       source: "Wikimedia Commons" as const,
       alt: "Minimal symmetrical hotel lobby interior with soft directional light",
     },
     pulse: {
-      src: local("project-pulse.jpg"),
+      src: local("project-pulse.webp"),
       source: "Wikimedia Commons" as const,
       alt: "Nighttime satellite view of a dense city's illuminated street network, evoking live financial data",
     },
     atlas: {
-      src: local("project-atlas.jpg"),
+      src: local("project-atlas.webp"),
       source: "Wikimedia Commons" as const,
       alt: "Aerial view of a coastal resort skyline suggesting travel and hospitality",
     },
     flow: {
-      src: local("project-flow.jpg"),
+      src: local("project-flow.webp"),
       source: "Unsplash" as const,
       alt: "Overhead view of a triple-monitor developer workstation, symmetrical and dark",
     },
@@ -58,39 +58,39 @@ export const media = {
 
   capabilities: {
     web: {
-      src: local("capability-web.jpg"),
+      src: local("capability-web.webp"),
       source: "Unsplash" as const,
       alt: "Modern architectural structure with strong angular geometric lines",
     },
     applications: {
-      src: local("capability-applications.jpg"),
+      src: local("capability-applications.webp"),
       source: "Unsplash" as const,
       alt: "Macro shot of source code displayed on a dark screen",
     },
     design: {
-      src: local("capability-design.jpg"),
+      src: local("capability-design.webp"),
       source: "Unsplash" as const,
       alt: "Two people reviewing an interface design together over a laptop",
     },
     mobile: {
-      src: local("capability-mobile.jpg"),
+      src: local("capability-mobile.webp"),
       source: "Wikimedia Commons" as const,
       alt: "Close-up of hands holding a mobile phone with a dark camera app interface",
     },
     ai: {
-      src: local("capability-ai.jpg"),
+      src: local("capability-ai.webp"),
       source: "Wikimedia Commons" as const,
       alt: "Macro detail of a green circuit board, abstract and technical",
     },
     ongoing: {
-      src: local("capability-ongoing.jpg"),
+      src: local("capability-ongoing.webp"),
       source: "Unsplash" as const,
       alt: "Modern architectural structure with strong angular geometric lines",
     },
   },
 
   team: {
-    src: local("approach-team.jpg"),
+    src: local("approach-team.webp"),
     source: "Unsplash" as const,
     alt: "Small group of specialists working together on laptops around a table",
   },

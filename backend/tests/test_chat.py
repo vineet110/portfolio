@@ -401,3 +401,73 @@ def test_llm_markdown_is_converted_to_plain_text_for_the_widget(client, monkeypa
         "int f(int n) { return n <= 1 ? 1 : n * f(n - 1); }\n"
         "- Base case stops it; 2 * 3 * 4 stays as-is."
     )
+
+
+# --- Streaming (POST /api/chat with "stream": true) -------------------------
+
+
+def _sse_events(response) -> list[dict]:
+    import json
+
+    return [json.loads(line[len("data: "):]) for line in response.text.splitlines() if line.startswith("data: ")]
+
+
+class _FakeStream:
+    """Stands in for the context manager `httpx.stream()` returns."""
+
+    def __init__(self, lines: list[str], status_code: int = 200):
+        self._lines = lines
+        self.status_code = status_code
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
+    def raise_for_status(self):
+        if self.status_code >= 400:
+            request = httpx.Request("POST", "https://api.openai.com/v1/chat/completions")
+            raise httpx.HTTPStatusError("error", request=request, response=httpx.Response(self.status_code))
+
+    def iter_lines(self):
+        yield from self._lines
+
+
+def _delta(text: str) -> str:
+    import json
+
+    return "data: " + json.dumps({"choices": [{"delta": {"content": text}, "finish_reason": None}]})
+
+
+def test_stream_without_llm_sends_one_final_knowledge_event(client):
+    response = client.post("/api/chat", json={"message": "What do you offer?", "stream": True})
+
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("text/event-stream")
+    events = _sse_events(response)
+    assert len(events) == 1
+    assert events[0]["done"] is True
+    assert events[0]["source"] == "knowledge"
+
+
+def test_stream_relays_llm_pieces_then_a_clean_final_answer(client, monkeypatch):
+    _configure_llm(monkeypatch)
+    lines = [_delta("**Hello"), _delta("** there"), "", "data: [DONE]"]
+    monkeypatch.setattr("app.services.llm_service.httpx.stream", lambda *a, **k: _FakeStream(lines))
+
+    response = client.post("/api/chat", json={"message": "Say hello", "stream": True})
+
+    events = _sse_events(response)
+    assert [e["delta"] for e in events if "delta" in e] == ["**Hello", "** there"]
+    assert events[-1] == {"done": True, "answer": "Hello there", "source": "llm"}
+
+
+def test_stream_falls_back_when_the_llm_fails_before_answering(client, monkeypatch):
+    _configure_llm(monkeypatch)
+    monkeypatch.setattr("app.services.llm_service.httpx.stream", lambda *a, **k: _FakeStream([], status_code=500))
+
+    response = client.post("/api/chat", json={"message": "What is the capital of France?", "stream": True})
+
+    assert response.status_code == 200
+    assert _sse_events(response) == [{"done": True, "answer": chat_service.FALLBACK_MESSAGE, "source": "fallback"}]

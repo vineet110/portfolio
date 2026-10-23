@@ -4,14 +4,16 @@ import { TypedText } from "../animations/TypedText"
 import { SectionLabel } from "../components/SectionLabel"
 import { ContactForm } from "../components/ContactForm"
 import { WhatsAppCta } from "../components/WhatsAppCta"
+import { scrollToTarget } from "../lib/scroll"
 
 export function FinalCta() {
   const formRef = useRef<HTMLDivElement>(null)
 
   function scrollToForm() {
-    formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+    if (formRef.current) scrollToTarget(formRef.current, { offset: -112 })
     window.setTimeout(() => {
-      formRef.current?.querySelector<HTMLInputElement>("#name")?.focus()
+      // preventScroll: the eased scroll above is already taking us there
+      formRef.current?.querySelector<HTMLInputElement>("#name")?.focus({ preventScroll: true })
     }, 400)
   }
 
@@ -30,7 +32,7 @@ export function FinalCta() {
       </span>
 
       <div className="container-studio flex flex-col items-center text-center">
-        <SectionLabel index="04" label="contact" className="mb-6" />
+        <SectionLabel index="06" label="contact" className="mb-6" />
 
         <h2 className="font-display max-w-3xl text-balance text-4xl font-bold leading-[1.05] tracking-tight text-ink sm:text-5xl md:text-6xl">
           <TypedText text="Have an idea?" speed={0.03} cursor={false} />

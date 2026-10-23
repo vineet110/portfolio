@@ -2,12 +2,15 @@ import { useEffect, useRef, useState, type FormEvent } from "react"
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion"
 import { Loader2, MessageCircle, RotateCcw, Send, X } from "lucide-react"
 import { api, ApiError, type ChatHistoryMessage, type ChatSource } from "../services/api"
+import { OPEN_CHAT_EVENT } from "../lib/scroll"
 
 type Message = {
   id: string
   role: "user" | "assistant"
   content: string
   source?: ChatSource
+  /** true while the answer is still arriving */
+  streaming?: boolean
 }
 
 type PendingCapture = "name" | "email" | null
@@ -73,6 +76,17 @@ export function ChatWidget() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" })
   }, [messages, isLoading])
 
+  // Other parts of the page (FAQ, command palette) can open the assistant.
+  useEffect(() => {
+    const onOpen = (e: Event) => {
+      setIsOpen(true)
+      const prefill = (e as CustomEvent<{ prefill?: string }>).detail?.prefill
+      if (prefill) setInput(prefill)
+    }
+    window.addEventListener(OPEN_CHAT_EVENT, onOpen)
+    return () => window.removeEventListener(OPEN_CHAT_EVENT, onOpen)
+  }, [])
+
   function addMessage(role: Message["role"], content: string, source?: ChatSource) {
     setMessages((prev) => [...prev, { id: createId(), role, content, source }])
   }
@@ -98,10 +112,37 @@ export function ChatWidget() {
       .map((m) => ({ role: m.role, content: m.content }))
 
     setIsLoading(true)
+    // The answer bubble is created on the first streamed piece (until then
+    // the "Thinking…" indicator shows), then updated in place as it grows.
+    let streamingId: string | null = null
+    const withPrefix = (t: string) => `${prefix ?? ""}${t}`
     try {
-      const response = await api.sendChatMessage({ message: text, history })
-      addMessage("assistant", `${prefix ?? ""}${response.answer}`, response.source)
+      const response = await api.streamChatMessage({ message: text, history }, (soFar) => {
+        if (!streamingId) {
+          const id = createId()
+          streamingId = id
+          setIsLoading(false)
+          setMessages((prev) => [...prev, { id, role: "assistant", content: withPrefix(soFar), streaming: true }])
+        } else {
+          const id = streamingId
+          setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, content: withPrefix(soFar) } : m)))
+        }
+      })
+      if (streamingId) {
+        const id = streamingId
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === id ? { ...m, content: withPrefix(response.answer), source: response.source, streaming: false } : m
+          )
+        )
+      } else {
+        addMessage("assistant", withPrefix(response.answer), response.source)
+      }
     } catch (err) {
+      if (streamingId) {
+        const id = streamingId
+        setMessages((prev) => prev.map((m) => (m.id === id ? { ...m, streaming: false } : m)))
+      }
       setError(
         err instanceof ApiError && err.status === 0
           ? "Could not reach the assistant. Please try again shortly."
@@ -278,7 +319,7 @@ export function ChatWidget() {
               </div>
             </header>
 
-            <div data-testid="chat-messages" className="flex-1 space-y-4 overflow-y-auto px-5 py-4">
+            <div data-testid="chat-messages" data-lenis-prevent className="flex-1 space-y-4 overflow-y-auto px-5 py-4">
               <p data-testid="chat-greeting" className="text-sm leading-relaxed text-ink-dim">
                 {GREETING}
               </p>
@@ -296,6 +337,12 @@ export function ChatWidget() {
                   }
                 >
                   {m.content}
+                  {m.streaming && (
+                    <span
+                      aria-hidden="true"
+                      className="animate-cursor-blink ml-0.5 inline-block h-[1em] w-[0.45em] translate-y-[0.15em] bg-accent"
+                    />
+                  )}
                 </motion.div>
               ))}
 

@@ -102,6 +102,82 @@ export type ChatLeadResponse = {
   phone: string | null
 }
 
+/**
+ * Light Markdown cleanup for text that is still streaming in — the
+ * backend's final answer is fully cleaned server-side, this only keeps the
+ * live preview from flashing **markers** while it's being written.
+ */
+function cleanPartial(text: string): string {
+  return text
+    .replace(/^[ \t]*```[^\n]*\n?/gm, "")
+    .replace(/^[ \t]*#{1,6}[ \t]+/gm, "")
+    .replace(/\*\*|__/g, "")
+}
+
+/**
+ * Sends a chat message asking for a streamed answer. `onDelta` receives the
+ * full answer-so-far each time a new piece arrives; the returned promise
+ * resolves with the final, cleaned answer. Also accepts a plain JSON reply
+ * (older backend, or a proxy that doesn't stream) — then `onDelta` is
+ * simply never called.
+ */
+async function streamChat(
+  payload: ChatRequestPayload,
+  onDelta: (answerSoFar: string) => void
+): Promise<ChatApiResponse> {
+  let response: Response
+  try {
+    response = await fetch(`${API_URL}/api/chat`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...payload, stream: true }),
+    })
+  } catch {
+    throw new ApiError("Could not reach the server. Please try again.", 0)
+  }
+  if (!response.ok) throw new ApiError("The request could not be completed.", response.status)
+
+  const contentType = response.headers.get("content-type") ?? ""
+  if (!contentType.includes("text/event-stream") || !response.body) {
+    return response.json() as Promise<ChatApiResponse>
+  }
+
+  const reader = response.body.getReader()
+  const decoder = new TextDecoder()
+  let buffer = ""
+  let raw = ""
+  let final: ChatApiResponse | null = null
+
+  const handleEvent = (block: string) => {
+    for (const line of block.split("\n")) {
+      if (!line.startsWith("data:")) continue
+      const event = JSON.parse(line.slice(5).trim()) as { delta?: string; done?: boolean } & Partial<ChatApiResponse>
+      if (event.delta) {
+        raw += event.delta
+        onDelta(cleanPartial(raw))
+      }
+      if (event.done && event.answer && event.source) final = { answer: event.answer, source: event.source }
+    }
+  }
+
+  for (;;) {
+    const { value, done } = await reader.read()
+    if (done) break
+    buffer += decoder.decode(value, { stream: true })
+    let boundary = buffer.indexOf("\n\n")
+    while (boundary !== -1) {
+      handleEvent(buffer.slice(0, boundary))
+      buffer = buffer.slice(boundary + 2)
+      boundary = buffer.indexOf("\n\n")
+    }
+  }
+  if (buffer.trim()) handleEvent(buffer)
+
+  if (final) return final
+  if (raw) return { answer: cleanPartial(raw), source: "llm" }
+  throw new ApiError("The assistant returned no answer.", 502)
+}
+
 export const api = {
   health: () => request<HealthResponse>("/api/health"),
   submitContact: (payload: ContactPayload) =>
@@ -114,6 +190,7 @@ export const api = {
       method: "POST",
       body: JSON.stringify(payload),
     }),
+  streamChatMessage: streamChat,
   saveChatLead: (payload: ChatLeadPayload) =>
     request<ChatLeadResponse>("/api/chat-lead", {
       method: "POST",

@@ -8,6 +8,9 @@ import { defineConfig, devices } from "@playwright/test"
 export default defineConfig({
   testDir: "./tests",
   fullyParallel: true,
+  // More workers than this overload the single Vite dev server on first
+  // load and tests time out; 2 keeps the full suite reliable.
+  workers: 2,
   retries: 0,
   reporter: [["list"], ["html", { open: "never" }]],
   use: {

@@ -3,6 +3,53 @@
 This document reflects the actual state of the project right now. See
 `docs/goal.md` for the long-term vision this state is working toward.
 
+## Status (2026-10-23): Phase V4 — showcase polish + streaming assistant (local, not yet deployed)
+
+Repo moved to GitHub (`github.com/vineet110/portfolio`, branch `main`) with a
+fresh root commit; Neon `DATABASE_URL` and a new Groq key are in
+`backend/.env` (gitignored). A redeploy to a **new Vercel account** is
+pending — set `DATABASE_URL`, `LLM_PROVIDER`, `LLM_MODEL`, `LLM_API_KEY`,
+`ALLOWED_ORIGINS` there.
+
+What V4 added (all respect `prefers-reduced-motion`; no fake stats/clients):
+
+- **Global**: Lenis smooth scroll (`src/lib/scroll.ts` — every programmatic
+  scroll goes through `scrollToTarget()`; scrollable panels use
+  `data-lenis-prevent`), top scroll-progress bar, trailing cursor ring
+  (fine pointers only, native cursor kept; `data-cursor="label"` shows a
+  label), once-per-session "boot" preloader (`pointer-events: none`, never
+  blocks clicks), ⌘K/Ctrl+K command palette (`CommandPalette.tsx`; other
+  components open it / the chat via window events in `lib/scroll.ts`).
+- **Hero**: pointer-lit dot grid, pointer depth-parallax on the floating
+  windows, "open for new projects" status chip, sheen on the key phrase.
+- **Nav**: sliding active-section pill (IntersectionObserver over every
+  `main section[id]`), ⌘K button.
+- **Work**: 3D tilt + glare on the active project window (`TiltCard`).
+- **Services**: pointer spotlight per module (`Spotlight`), image zoom.
+- **New 04 "Under the hood"** (`sections/Stack.tsx`): this site's real stack
+  (no vendor/hosting names) + a live `GET /api/health` latency readout,
+  fired only once the terminal scrolls into view.
+- **New 05 FAQ** (`sections/Faq.tsx`, `data/faq.ts` — mirrors
+  `backend/app/knowledge/faq.md`; keep in sync) with "ask the assistant".
+  Contact is now 06.
+- **Marquee** reacts to scroll velocity/direction. **Footer**: oversized
+  outlined "let's build." wordmark, back-to-top, palette hint.
+- **Assistant streaming**: `POST /api/chat` with `"stream": true` returns
+  SSE — `{"delta"}` events then one `{"done", "answer", "source"}` (the
+  final answer is the cleaned, authoritative one). Without the flag the
+  JSON contract is unchanged. The widget falls back to JSON replies
+  automatically (that's how the mocked Playwright tests still pass).
+  Fallback semantics match `answer_question()`; a mid-stream LLM failure
+  keeps the partial answer.
+- **Perf/SEO**: all `public/images` converted to WebP (JPGs removed, ~3.0 →
+  1.9 MB); process characters resized 1122px → 640px (~7 MB → ~0.4 MB);
+  Google Fonts trimmed to used weights; OG/Twitter meta + `public/og-image.png`
+  (relative URL — make absolute once the domain is final); `robots.txt`.
+- **Verification**: backend pytest 41/41 (3 new streaming tests), `tsc -b`
+  + oxlint clean, production build OK, Playwright 52/52 with
+  `workers: 2` (now set in `playwright.config.ts` — more workers overload
+  the dev server and time out). Real Groq streaming verified in-browser.
+
 ## Status (2026-10-01): Phase V3.6 — Groq AI chatbot (general AI + portfolio RAG)
 
 - **Provider**: Groq, free tier, model `openai/gpt-oss-120b`

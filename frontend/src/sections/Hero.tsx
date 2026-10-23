@@ -1,9 +1,10 @@
-import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion"
+import { motion, useMotionValue, useReducedMotion, useScroll, useSpring, useTransform } from "framer-motion"
 import { useRef } from "react"
 import { ArrowDown, ArrowUpRight } from "lucide-react"
 import { TypedText } from "../animations/TypedText"
 import { MagneticButton } from "../animations/MagneticButton"
 import { WindowChrome } from "../components/WindowChrome"
+import { DotGrid } from "../components/Spotlight"
 import { projects } from "../data/projects"
 import { whatsappUrl } from "../data/contact"
 
@@ -17,6 +18,31 @@ type FloatingWindow = {
   fromY: number
   delay: number
   speed: "back" | "mid" | "fore"
+}
+
+/** how far (px) each depth layer drifts with the pointer */
+const POINTER_DEPTH = { back: 10, mid: 18, fore: 30 } as const
+
+function ParallaxLayer({
+  depth,
+  mx,
+  my,
+  className,
+  children,
+}: {
+  depth: number
+  mx: ReturnType<typeof useSpring>
+  my: ReturnType<typeof useSpring>
+  className: string
+  children: React.ReactNode
+}) {
+  const x = useTransform(mx, (v) => v * depth)
+  const y = useTransform(my, (v) => v * depth)
+  return (
+    <motion.div style={{ x, y }} className={className}>
+      {children}
+    </motion.div>
+  )
 }
 
 const WINDOWS: FloatingWindow[] = [
@@ -72,10 +98,39 @@ export function Hero() {
   const contentOpacity = useTransform(scrollYProgress, [0, 0.6], [1, 0])
   const contentY = useTransform(scrollYProgress, [0, 1], ["0%", "10%"])
 
+  // Pointer position over the hero, -1…1 on each axis, smoothed — drives
+  // the floating windows' depth parallax and the dot-grid spotlight.
+  const pointerX = useMotionValue(0)
+  const pointerY = useMotionValue(0)
+  const mx = useSpring(pointerX, { stiffness: 60, damping: 18, mass: 0.6 })
+  const my = useSpring(pointerY, { stiffness: 60, damping: 18, mass: 0.6 })
+
+  function handlePointerMove(e: React.PointerEvent<HTMLElement>) {
+    if (e.pointerType !== "mouse") return
+    const el = e.currentTarget
+    const rect = el.getBoundingClientRect()
+    const x = e.clientX - rect.left
+    const y = e.clientY - rect.top
+    el.style.setProperty("--spot-x", `${x}px`)
+    el.style.setProperty("--spot-y", `${y}px`)
+    el.style.setProperty("--spot-o", "1")
+    if (prefersReducedMotion) return
+    pointerX.set((x / rect.width) * 2 - 1)
+    pointerY.set((y / rect.height) * 2 - 1)
+  }
+
+  function handlePointerLeave(e: React.PointerEvent<HTMLElement>) {
+    e.currentTarget.style.setProperty("--spot-o", "0")
+    pointerX.set(0)
+    pointerY.set(0)
+  }
+
   return (
     <section
       id="top"
       ref={ref}
+      onPointerMove={handlePointerMove}
+      onPointerLeave={handlePointerLeave}
       className="relative flex min-h-[100svh] flex-col items-center justify-center overflow-hidden bg-bg pt-24 md:pt-28"
     >
       {/* ambient signature glow — replaces "plain black" with intent */}
@@ -84,6 +139,8 @@ export function Hero() {
         <div className="absolute bottom-[-10%] right-[10%] h-[40vh] w-[40vh] rounded-full bg-amber/10 blur-[120px]" />
       </div>
 
+      <DotGrid />
+
       {/* floating project windows — the work itself, present from the first frame */}
       <motion.div
         aria-hidden="true"
@@ -91,8 +148,8 @@ export function Hero() {
         className="pointer-events-none absolute inset-0 opacity-90"
       >
         {WINDOWS.map((w, i) => (
+          <ParallaxLayer key={i} depth={POINTER_DEPTH[w.speed]} mx={mx} my={my} className={w.className}>
           <motion.div
-            key={i}
             style={prefersReducedMotion ? undefined : { y: speedMap[w.speed] }}
             initial={
               prefersReducedMotion
@@ -105,7 +162,6 @@ export function Hero() {
                 : { opacity: 1, x: 0, y: 0, rotate: w.rotate, scale: 1 }
             }
             transition={{ duration: 1, delay: w.delay, ease: [0.16, 1, 0.3, 1] }}
-            className={w.className}
           >
             <WindowChrome label={`${w.project.id}.app`} className="shadow-2xl shadow-black/50">
               <img
@@ -116,6 +172,7 @@ export function Hero() {
               />
             </WindowChrome>
           </motion.div>
+          </ParallaxLayer>
         ))}
       </motion.div>
 
@@ -129,9 +186,21 @@ export function Hero() {
           className="w-full max-w-2xl text-left shadow-2xl shadow-black/60"
         >
           <div className="px-5 py-8 sm:px-8 sm:py-10">
-            <p className="font-mono text-xs text-ink-faint sm:text-sm">
-              <span className="text-accent">studio</span>@web:~$ init
-            </p>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <p className="font-mono text-xs text-ink-faint sm:text-sm">
+                <span className="text-accent">studio</span>@web:~$ init
+              </p>
+              <span
+                data-testid="availability"
+                className="inline-flex items-center gap-2 rounded-full border border-border px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.15em] text-ink-dim"
+              >
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-char-green opacity-70" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-char-green" />
+                </span>
+                open for new projects
+              </span>
+            </div>
 
             <h1 className="font-display mt-4 text-balance text-[clamp(1.9rem,7vw,3.5rem)] font-bold leading-[1.08] tracking-tight text-ink">
               <TypedText text="We make websites and apps." speed={0.032} />
@@ -143,7 +212,7 @@ export function Hero() {
               transition={{ delay: 1.9, duration: 0.6 }}
               className="mt-4 font-mono text-sm text-ink-dim sm:text-base"
             >
-              <span className="text-amber">//</span> Have an idea? We design and build it —
+              <span className="text-amber">//</span> Have an idea? We <span className="text-sheen">design and build it</span> —
               start to finish, by one dedicated team.
             </motion.p>
 

@@ -1,19 +1,55 @@
+import { useRef } from "react"
+import {
+  motion,
+  useAnimationFrame,
+  useMotionValue,
+  useReducedMotion,
+  useScroll,
+  useSpring,
+  useTransform,
+  useVelocity,
+  wrap,
+} from "framer-motion"
+
 type MarqueeProps = {
   items: string[]
   className?: string
+  /** base drift, in % of one copy per second (negative = leftward) */
+  baseVelocity?: number
 }
 
 /**
- * Infinite horizontal ticker. Pure CSS animation (transform-based, GPU
- * friendly) so it stays performant; paused automatically for
- * prefers-reduced-motion via the global rule in index.css.
+ * Infinite horizontal ticker that reacts to scrolling: it speeds up with
+ * scroll velocity and flips direction when the visitor scrolls back up.
+ * Transform-only, so it stays on the GPU; static for reduced motion.
  */
-export function Marquee({ items, className = "" }: MarqueeProps) {
-  const track = [...items, ...items]
+export function Marquee({ items, className = "", baseVelocity = -2.2 }: MarqueeProps) {
+  const prefersReducedMotion = useReducedMotion()
+  const baseX = useMotionValue(0)
+  const { scrollY } = useScroll()
+  const scrollVelocity = useVelocity(scrollY)
+  const smoothVelocity = useSpring(scrollVelocity, { damping: 50, stiffness: 400 })
+  const velocityFactor = useTransform(smoothVelocity, [0, 1000], [0, 4], { clamp: false })
+  const direction = useRef(1)
+
+  // Four copies; wrapping at -25% (one copy) makes the loop seamless.
+  const x = useTransform(baseX, (v) => `${wrap(-25, 0, v)}%`)
+
+  useAnimationFrame((_, delta) => {
+    if (prefersReducedMotion) return
+    let moveBy = direction.current * baseVelocity * (delta / 1000)
+    const vf = velocityFactor.get()
+    if (vf < 0) direction.current = -1
+    else if (vf > 0) direction.current = 1
+    moveBy += direction.current * moveBy * vf
+    baseX.set(baseX.get() + moveBy)
+  })
+
+  const track = [...items, ...items, ...items, ...items]
 
   return (
     <div className={`overflow-hidden border-y border-border ${className}`}>
-      <div className="flex w-max animate-marquee py-4">
+      <motion.div style={{ x }} className="flex w-max py-4">
         {track.map((item, i) => (
           <span
             key={i}
@@ -23,7 +59,7 @@ export function Marquee({ items, className = "" }: MarqueeProps) {
             <span className="h-1.5 w-1.5 rounded-full bg-amber" />
           </span>
         ))}
-      </div>
+      </motion.div>
     </div>
   )
 }

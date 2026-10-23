@@ -11,8 +11,10 @@ only ever read from server-side settings and sent in the Authorization
 header — never logged, never returned.
 """
 
+import json
 import logging
 import time
+from collections.abc import Iterator
 
 import httpx
 
@@ -57,6 +59,54 @@ def ask(
         raise ValueError(f"Unsupported LLM_PROVIDER '{settings.llm_provider}'.")
 
     return _ask_openai_compatible(settings, system_prompt, message, history or [])
+
+
+def ask_stream(
+    settings: Settings,
+    system_prompt: str,
+    message: str,
+    history: list[dict[str, str]] | None = None,
+) -> Iterator[str]:
+    """Like `ask()`, but yields the answer in pieces as the provider
+    generates it. Raises on any failure — including before the first piece,
+    so callers can still fall back cleanly when nothing has been sent yet."""
+    if not is_configured(settings):
+        raise RuntimeError("LLM is not configured.")
+    if settings.llm_provider not in _PROVIDER_ENDPOINTS:
+        raise ValueError(f"Unsupported LLM_PROVIDER '{settings.llm_provider}'.")
+
+    messages = [{"role": "system", "content": system_prompt}]
+    messages.extend(history or [])
+    messages.append({"role": "user", "content": message})
+    body = _request_body(settings, messages)
+    body["stream"] = True
+
+    with httpx.stream(
+        "POST",
+        _PROVIDER_ENDPOINTS[settings.llm_provider],
+        headers={"Authorization": f"Bearer {settings.llm_api_key}"},
+        json=body,
+        timeout=_REQUEST_TIMEOUT_SECONDS,
+    ) as response:
+        response.raise_for_status()
+        produced = False
+        for line in response.iter_lines():
+            if not line.startswith("data:"):
+                continue
+            data = line[len("data:"):].strip()
+            if data == "[DONE]":
+                break
+            choices = json.loads(data).get("choices") or []
+            if not choices:
+                continue
+            piece = (choices[0].get("delta") or {}).get("content")
+            if piece:
+                produced = True
+                yield piece
+            if choices[0].get("finish_reason") == "length":
+                logger.warning("LLM answer hit the token limit and may be truncated.")
+        if not produced:
+            raise RuntimeError("LLM returned no answer.")
 
 
 def _is_reasoning_model(settings: Settings) -> bool:
