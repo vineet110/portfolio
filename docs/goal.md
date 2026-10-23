@@ -97,7 +97,8 @@ questions:
 free tier (`openai/gpt-oss-120b`) — real generation verified, real answer
 quality checked (studio facts, general questions, mixed questions,
 follow-ups, unknown facts, prompt injection), full regression passed. See
-`docs/memory.md` "Phase V3.6 findings".
+`docs/memory.md` "Phase V3.6 findings". Since 2026-10-23 answers stream
+to the widget as they are generated (`"stream": true` on `/api/chat`).
 
 **Next milestone**: keep watching real answer quality in production; if
 keyword retrieval becomes the limiting factor as the knowledge base grows,
@@ -105,9 +106,15 @@ consider embeddings then (deliberately not introduced yet).
 
 ## Site structure (MVP, single page)
 
-Navigation → Hero → Selected Work → Services → Process → Final CTA →
-Footer. (The standalone "Studio Approach" section was removed — the
-dedicated-team message now lives as one line inside Process.)
+Navigation → Hero → Selected Work → Services → Process → Under the hood →
+FAQ → Final CTA → Footer. (The standalone "Studio Approach" section was
+removed — the dedicated-team message now lives as one line inside Process.)
+
+"Under the hood" shows only this site's own, real stack — never vendor or
+hosting names — and the FAQ must stay consistent with
+`backend/app/knowledge/faq.md`, so the page and the chatbot never disagree.
+Site-wide extras (⌘K command palette, preloader, cursor ring) are
+enhancements only: the page must work fully without them.
 
 Quality bar: fewer, exceptionally well-designed sections beats many mediocre
 ones. The portfolio itself is the pitch.
@@ -116,7 +123,7 @@ ones. The portfolio itself is the pitch.
 
 Frontend: React + TypeScript + Vite + Tailwind CSS + Framer Motion, GSAP only
 where genuinely needed for advanced scroll/timeline work, Lucide icons,
-optional Lenis for smooth scroll.
+Lenis for smooth scroll (in use since 2026-10-23, off for reduced motion).
 
 Backend: FastAPI + SQLAlchemy + PostgreSQL, introduced in Phase 2 once a real
 feature (the contact form) needed it. Architecture is fixed as
