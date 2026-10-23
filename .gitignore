@@ -1,0 +1,54 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Frontend
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Backend
+backend/.venv/
+__pycache__/
+*.pyc
+*.db
+*.sqlite3
+
+# Environment files — never commit real secrets.
+# This must be the LAST word on .env* matching in this file: any broader
+# .env* pattern placed after the negation below would silently re-ignore
+# .env.example again (gitignore uses last-match-wins per path).
+.env
+.env.*
+!.env.example
+
+# Vercel
+.vercel/
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Playwright
+frontend/test-results/
+frontend/playwright-report/
+frontend/playwright/.cache/
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.swp
