@@ -271,6 +271,40 @@ test.describe("Under the hood", () => {
   })
 })
 
+test.describe("FAQ", () => {
+  test("tapping a question sends it into the conversation and the studio answers", async ({ page }) => {
+    await page.goto("/")
+    const section = page.locator("#faq")
+    await section.scrollIntoViewIfNeeded()
+    const thread = section.getByRole("log", { name: "Conversation" })
+
+    // opens with the first question already answered
+    await expect(thread.getByText(/a rough idea is enough to start/)).toBeVisible()
+
+    await section.getByTestId("faq-toggle-4").click()
+    await expect(thread.getByText("Do you have fixed packages or pricing?")).toBeVisible()
+    await expect(thread.getByText(/Every project is scoped individually/)).toBeVisible({ timeout: 3000 })
+    // an asked question leaves the list
+    await expect(section.getByTestId("faq-toggle-4")).toHaveCount(0)
+  })
+
+  test("every answer is available to screen readers without interacting", async ({ page }) => {
+    await page.goto("/")
+    const all = page.locator("#faq dl")
+    await expect(all.locator("dt")).toHaveCount(7)
+    await expect(all).toContainText("Are the projects in the Work section real client work?")
+  })
+
+  test("start over resets the conversation", async ({ page }) => {
+    await page.goto("/")
+    const section = page.locator("#faq")
+    await section.scrollIntoViewIfNeeded()
+    await section.getByTestId("faq-toggle-1").click()
+    await section.getByRole("button", { name: /start over/i }).click()
+    await expect(section.getByTestId("faq-toggle-1")).toBeVisible()
+  })
+})
+
 test.describe("Process (told by the hero)", () => {
   test("names all five stages under the corrected heading", async ({ page }) => {
     await page.goto("/")

@@ -108,10 +108,17 @@ Replaces the old one-project-at-a-time scroll track (too much scrolling).
 - [x] **5.4 Real stack only** — no vendor or hosting names (test-guarded).
 - [x] **5.5 Principles as a spec strip** — fast, accessible, secure, tested.
 
-## 6. FAQ — margin notes
+## 6. FAQ — "Ask us anything" as a conversation
 
-- [ ] **6.1 Questions as handwritten margin notes** that expand into answers.
-- [ ] **6.2 Stay in sync** with `backend/app/knowledge/faq.md`.
+- [x] **6.1 Questions as message chips** — tapping one flies it across into
+  the chat thread (shared layout animation); the studio types, then answers.
+- [x] **6.2 Asked questions leave the list**; "start over" resets, and
+  "ask the assistant something else" opens the real chatbot.
+- [x] **6.3 Phones**: chat sits above the questions, so answers appear right
+  where you tapped.
+- [x] **6.4 Accessible** — the thread is a live log; the full Q&A list is
+  always present for screen readers and crawlers.
+- [x] **6.5 Stay in sync** with `backend/app/knowledge/faq.md` (copy unchanged).
 
 ## 7. Final CTA — "Your idea goes here"
 
