@@ -45,32 +45,23 @@ test.describe("Responsive layout", () => {
   }
 })
 
-test.describe("Process on mobile", () => {
-  test("one character stays within the viewport, no overflow", async ({ page }) => {
+test.describe("Hero on mobile", () => {
+  test("the artboard stays within the viewport, below the nav", async ({ page }) => {
     await page.setViewportSize(viewports.mobile)
     await page.goto("/")
-    const stage = page.locator("[data-testid=process-stage]")
-    await stage.scrollIntoViewIfNeeded()
-
-    await expect(stage.getByTestId("process-active-character")).toHaveCount(1)
-    const box = await stage.boundingBox()
-    expect(box).not.toBeNull()
-    expect(box!.x).toBeGreaterThanOrEqual(0)
-    expect(box!.x + box!.width).toBeLessThanOrEqual(viewports.mobile.width + 2)
-
-    const img = stage.locator("img")
-    const naturalWidth = await img.evaluate((el: HTMLImageElement) => el.naturalWidth)
-    expect(naturalWidth).toBeGreaterThan(0)
+    const board = await page.getByTestId("hero-artboard").boundingBox()
+    expect(board).not.toBeNull()
+    expect(board!.x).toBeGreaterThanOrEqual(0)
+    expect(board!.x + board!.width).toBeLessThanOrEqual(viewports.mobile.width + 2)
+    expect(board!.y + board!.height).toBeLessThanOrEqual(viewports.mobile.height + 2)
   })
 
   test("respects prefers-reduced-motion", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" })
     await page.setViewportSize(viewports.mobile)
     await page.goto("/")
-    const stage = page.locator("[data-testid=process-stage]")
-    await stage.scrollIntoViewIfNeeded()
-
-    await expect(stage.getByTestId("process-active-character")).toBeVisible()
+    await expect(page.locator("#top").getByRole("heading", { level: 1 })).toBeVisible()
+    await expect(page.locator("#process").getByRole("heading", { level: 3, name: "Launch" })).toBeAttached()
   })
 })
 

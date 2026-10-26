@@ -74,30 +74,38 @@ test.describe("Navigation", () => {
 })
 
 test.describe("Hero", () => {
-  test("shows the typed headline, both CTAs, and the floating project windows", async ({ page }) => {
+  test("opens on the paper sketch with the real headline, both CTAs, and images in the DOM", async ({ page }) => {
     await page.goto("/")
 
     const hero = page.locator("#top")
     const headline = hero.getByRole("heading", { level: 1 })
-    await expect(headline).toBeVisible()
+    await expect(headline).toBeAttached()
     await expect(headline).toContainText("We make websites and apps.")
+    await expect(hero.getByText(/Have an idea\? We design and build it/)).toBeAttached()
 
-    await expect(hero.getByText(/Have an idea\? We design and build it/)).toBeVisible()
+    // the page opens on paper — the nav follows the surface
+    await expect(page.locator("html")).toHaveAttribute("data-surface", "paper")
 
     const primaryCta = hero.getByRole("link", { name: /let's connect/i })
-    await expect(primaryCta).toBeVisible()
     await expect(primaryCta).toHaveAttribute("href", WHATSAPP_URL)
     await expect(primaryCta).toHaveAttribute("target", "_blank")
 
-    const secondaryCta = hero.getByRole("link", { name: /view work/i })
-    await expect(secondaryCta).toBeVisible()
+    expect(await hero.locator("img").count()).toBeGreaterThanOrEqual(2)
+  })
 
-    // The floating windows are real project previews, not stock imagery.
-    const heroImages = hero.locator("img")
-    expect(await heroImages.count()).toBeGreaterThanOrEqual(2)
+  test("focusing a CTA before the design is revealed scrolls the build forward, and view work still works", async ({
+    page,
+  }) => {
+    await page.goto("/")
+    const hero = page.locator("#top")
+    const secondaryCta = hero.getByRole("link", { name: /view work/i })
+
+    await secondaryCta.focus()
+    await expect(page.locator("html")).toHaveAttribute("data-surface", "ink", { timeout: 4000 })
+    await page.waitForTimeout(800)
 
     await secondaryCta.click()
-    await page.waitForTimeout(600)
+    await page.waitForTimeout(1500)
     const workBox = await page.locator("#work").boundingBox()
     expect(workBox).not.toBeNull()
     expect(Math.abs(workBox!.y)).toBeLessThan(300)
@@ -115,88 +123,75 @@ test.describe("Hero", () => {
 })
 
 test.describe("Work", () => {
-  test("shows the corrected heading and honest, non-client-claiming supporting copy", async ({ page }) => {
+  async function gotoWork(page: import("@playwright/test").Page) {
+    await page.setViewportSize({ width: 1440, height: 900 })
     await page.goto("/")
-    const section = page.locator("#work")
-    await section.scrollIntoViewIfNeeded()
+    await page.locator("header nav").getByRole("link", { name: "work", exact: true }).click()
+    await page.waitForTimeout(2500)
+    return page.locator("#work")
+  }
 
-    await expect(section.getByRole("heading", { level: 2 })).toContainText("Made by our team.")
-    await expect(page.getByText(/windows we've opened/i)).toHaveCount(0)
+  test("keeps the honest framing: made by our team, not real client work", async ({ page }) => {
+    const section = await gotoWork(page)
+    await expect(section.getByText(/made by our team/i)).toBeVisible()
     await expect(section.getByText(/not real client work/i)).toBeVisible()
   })
 
-  test("shows heading, every project name, and the default active project", async ({ page }) => {
-    await page.goto("/")
-    const section = page.locator("#work")
-    // Align precisely to the top of the section — it's a tall scroll track
-    // driving five projects, so scrollIntoViewIfNeeded's "nearest edge"
-    // behavior can land mid-track instead of at project 0.
-    await page.evaluate(() => document.getElementById("work")?.scrollIntoView({ block: "start" }))
-
-    await expect(section.getByRole("heading", { level: 2 })).toBeVisible()
-    for (const name of ["AI Workspace", "Maison", "Pulse", "Atlas", "Flow"]) {
-      await expect(section.getByRole("heading", { level: 3, name })).toBeVisible()
+  test("shows all five projects at once, each labelled CONCEPT or EXPERIMENTAL, on one screen", async ({ page }) => {
+    const section = await gotoWork(page)
+    const expected: Record<string, string> = {
+      "ai-workspace": "CONCEPT",
+      maison: "CONCEPT",
+      pulse: "EXPERIMENTAL",
+      atlas: "CONCEPT",
+      flow: "EXPERIMENTAL",
     }
-
-    // AI Workspace is the default active project, and it's a CONCEPT.
-    await expect(section.getByTestId("work-index-ai-workspace")).toHaveAttribute("data-active", "true")
-    await expect(section.getByTestId("work-status-badge")).toHaveText("CONCEPT")
-    await expect(section.getByText(/concept exploration — not a live client site/i)).toBeVisible()
+    for (const [id, status] of Object.entries(expected)) {
+      await expect(section.getByTestId(`work-tile-${id}`)).toBeInViewport()
+      await expect(section.getByTestId(`work-status-${id}`)).toHaveText(status)
+    }
+    for (const name of ["AI Workspace", "Maison", "Pulse", "Atlas", "Flow"]) {
+      await expect(section.getByRole("heading", { level: 3, name, exact: true })).toBeVisible()
+    }
   })
 
-  test("selecting a different project brings it forward and updates its status label", async ({ page }) => {
-    await page.goto("/")
-    const section = page.locator("#work")
-    await section.scrollIntoViewIfNeeded()
-
-    // Pulse is EXPERIMENTAL — switching to it should swap both the active
-    // flag and the visible status badge.
-    await section.getByTestId("work-index-pulse").click()
-
-    await expect(section.getByTestId("work-index-pulse")).toHaveAttribute("data-active", "true")
-    await expect(section.getByTestId("work-index-ai-workspace")).toHaveAttribute("data-active", "false")
-    await expect(section.getByTestId("work-status-badge")).toHaveText("EXPERIMENTAL")
+  test("is compact — no tall scroll track", async ({ page }) => {
+    const section = await gotoWork(page)
+    const box = await section.boundingBox()
+    expect(box!.height).toBeLessThan(900 * 1.3)
   })
 
-  test("selecting a project is keyboard-operable", async ({ page }) => {
-    await page.goto("/")
-    const section = page.locator("#work")
-    await section.scrollIntoViewIfNeeded()
-
-    await section.getByTestId("work-index-maison").press("Enter")
-    await expect(section.getByTestId("work-index-maison")).toHaveAttribute("data-active", "true")
+  test("hovering a project lets its world take over the section", async ({ page }) => {
+    const section = await gotoWork(page)
+    const before = await section.evaluate((el) => getComputedStyle(el).backgroundColor)
+    await section.getByTestId("work-tile-maison").hover()
+    await expect
+      .poll(() => section.evaluate((el) => getComputedStyle(el).backgroundColor))
+      .not.toBe(before)
   })
 
-  test("a project's page-preview tabs are interactive", async ({ page }) => {
-    await page.goto("/")
-    const activeWindow = page.locator("#work").getByTestId("work-active-window")
-    await activeWindow.scrollIntoViewIfNeeded()
-
-    // AI Workspace is active by default.
-    const workspaceTab = activeWindow.getByRole("button", { name: "Workspace", exact: true })
-    await expect(workspaceTab).toBeVisible()
-    await workspaceTab.click()
-    await expect(activeWindow.getByText("ai-workspace.app — workspace")).toBeVisible()
+  test("the mini-sites are interactive (Maison's bag fills up)", async ({ page }) => {
+    const section = await gotoWork(page)
+    const maison = section.getByTestId("work-tile-maison")
+    await maison.getByRole("button", { name: "Add to bag" }).click()
+    await expect(maison.getByText("Added to bag ✓")).toBeVisible()
+    await expect(maison.getByText("Bag (1)")).toBeVisible()
   })
 
-  test("the kinetic stage occupies a compact scroll length, not a huge one", async ({ page }) => {
-    await page.setViewportSize({ width: 1440, height: 900 })
-    await page.goto("/")
+  test("open case shows an honest, keyboard-friendly case view", async ({ page }) => {
+    const section = await gotoWork(page)
+    const opener = section.getByTestId("work-open-pulse")
+    await opener.click()
 
-    // The whole Work section (heading + the fixed-height scroll track that
-    // drives the five-project sequence) must stay within a bounded, compact
-    // multiple of the viewport height — not many screens of scrolling.
-    const box = await page.locator("#work").boundingBox()
-    expect(box).not.toBeNull()
-    expect(box!.height).toBeLessThan(900 * 3.2)
-  })
+    const dialog = page.getByRole("dialog", { name: "Pulse" })
+    await expect(dialog).toBeVisible()
+    await expect(dialog.getByText("EXPERIMENTAL", { exact: true })).toBeVisible()
+    await expect(dialog.getByText(/concept exploration — not a live client site/i)).toBeVisible()
+    await expect(dialog.getByRole("button", { name: "Close case" })).toBeFocused()
 
-  test("only one active project window is dominant, with secondary windows behind it", async ({ page }) => {
-    await page.goto("/")
-    const stage = page.locator("[data-testid=work-stage]")
-    await stage.scrollIntoViewIfNeeded()
-
-    await expect(stage.getByTestId("work-active-window")).toHaveCount(1)
+    await page.keyboard.press("Escape")
+    await expect(dialog).toHaveCount(0)
+    await expect(opener).toBeFocused()
   })
 })
 
@@ -233,80 +228,59 @@ test.describe("Services", () => {
   })
 })
 
-test.describe("Process", () => {
-  test("shows all five build-log steps without clipped text", async ({ page }) => {
+test.describe("Process (told by the hero)", () => {
+  test("names all five stages under the corrected heading", async ({ page }) => {
     await page.goto("/")
-    const section = page.locator("#process")
-    await section.scrollIntoViewIfNeeded()
+    const hero = page.locator("#top")
 
-    for (const step of ["Idea", "UI/UX", "Design", "Development", "Launch"]) {
-      await expect(section.getByRole("heading", { level: 3, name: step, exact: true })).toBeVisible()
-    }
-  })
-
-  test("shows the corrected process heading, not the old one-person wording", async ({ page }) => {
-    await page.goto("/")
-    const section = page.locator("#process")
-    await section.scrollIntoViewIfNeeded()
-
-    await expect(section.getByRole("heading", { level: 2 })).toContainText("One team, five stages.")
+    await expect(hero.getByRole("heading", { level: 2 })).toContainText("One team, five stages.")
     await expect(page.getByText(/one person, five stages/i)).toHaveCount(0)
+    for (const step of ["Idea", "UI/UX", "Design", "Development", "Launch"]) {
+      await expect(hero.getByRole("heading", { level: 3, name: step })).toBeVisible()
+    }
   })
 
-  test("only one process character is active/visible at a time, and it actually loads", async ({ page }) => {
+  test("the artboard does not overlap the navigation", async ({ page }) => {
     await page.goto("/")
-    const stage = page.locator("[data-testid=process-stage]")
-    await stage.scrollIntoViewIfNeeded()
-
-    const activeCharacters = stage.getByTestId("process-active-character")
-    await expect(activeCharacters).toHaveCount(1)
-
-    const img = activeCharacters.locator("img")
-    await expect(img).toBeVisible()
-    const { naturalWidth, src } = await img.evaluate((el: HTMLImageElement) => ({
-      naturalWidth: el.naturalWidth,
-      src: el.src,
-    }))
-    expect(naturalWidth).toBeGreaterThan(0)
-    expect(src).toMatch(/process-(planning|uiux|design|development|launch)/)
-  })
-
-  test("the process stage does not overlap the navigation", async ({ page }) => {
-    await page.goto("/")
-    const stage = page.locator("[data-testid=process-stage]")
-    await stage.scrollIntoViewIfNeeded()
-
     const navBox = await page.locator("header nav").boundingBox()
-    const stageBox = await stage.boundingBox()
+    const boardBox = await page.getByTestId("hero-artboard").boundingBox()
     expect(navBox).not.toBeNull()
-    expect(stageBox).not.toBeNull()
-    expect(stageBox!.y).toBeGreaterThanOrEqual(navBox!.y + navBox!.height - 4)
+    expect(boardBox).not.toBeNull()
+    expect(boardBox!.y).toBeGreaterThanOrEqual(navBox!.y + navBox!.height - 4)
   })
 
-  test("the full five-phase journey fits in a compact scroll length", async ({ page }) => {
+  test("the nav's process link lands on the UI/UX stage", async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 })
+    await page.goto("/")
+    await page.locator("header nav").getByRole("link", { name: "process" }).click()
+    await expect(page.locator("#top li[data-active] h3")).toContainText("UI/UX", { timeout: 4000 })
+  })
+
+  test("scrolling through the hero reaches every stage, ending on Launch with the deploy log live", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 })
     await page.goto("/")
 
-    const box = await page.locator("#process").boundingBox()
-    expect(box).not.toBeNull()
-    // Header + a ~170vh track, comfortably under 2.5 viewport heights total.
-    expect(box!.height).toBeLessThan(900 * 2.5)
-  })
-
-  test("scrolling through the section reaches every phase, ending on Launch", async ({ page }) => {
-    await page.setViewportSize({ width: 1440, height: 900 })
-    await page.goto("/")
-    const section = page.locator("#process")
-    await section.scrollIntoViewIfNeeded()
-
-    const box = (await section.boundingBox())!
-    const steps = 6
-    for (let i = 0; i <= steps; i++) {
-      await page.mouse.wheel(0, box.height / steps)
-      await page.waitForTimeout(50)
+    const height = (await page.locator("#top").boundingBox())!.height
+    const steps = 12
+    for (let i = 0; i < steps; i++) {
+      await page.mouse.wheel(0, height / steps)
+      await page.waitForTimeout(120)
     }
 
-    await expect(page.locator("[data-testid=process-active-character]")).toHaveAttribute("data-phase", "launch")
+    const active = page.locator("#top li[data-active] h3")
+    await expect(active).toContainText("Launch", { timeout: 4000 })
+    await expect(page.getByText("live — you're looking at it.")).toBeVisible()
+    await expect(page.locator("html")).toHaveAttribute("data-surface", "ink")
+  })
+
+  test("with reduced motion, the five stages are laid out flat", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" })
+    await page.goto("/")
+    const process = page.locator("#process")
+    await process.scrollIntoViewIfNeeded()
+    for (const step of ["Idea", "UI/UX", "Design", "Development", "Launch"]) {
+      await expect(process.getByRole("heading", { level: 3, name: step })).toBeVisible()
+    }
   })
 })
 

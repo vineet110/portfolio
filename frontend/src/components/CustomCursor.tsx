@@ -63,7 +63,7 @@ export function CustomCursor() {
   const size = label ? 72 : hovering ? 44 : 26
 
   return (
-    <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-[70]">
+    <div aria-hidden="true" data-cursor-layer className="pointer-events-none fixed inset-0 z-[70]">
       <motion.div
         style={{ x: ringX, y: ringY }}
         animate={{ opacity: visible ? 1 : 0 }}

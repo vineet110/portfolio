@@ -5,6 +5,11 @@
   --font-display: "Archivo", "Inter", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
   --font-sans: "Inter", system-ui, sans-serif;
+  /* the hero's pencil handwriting — only ever decorative */
+  --font-hand: "Caveat", "Segoe Print", "Bradley Hand", cursive;
+  /* Work-section "worlds" — each concept project speaks its own type */
+  --font-serif: "Fraunces", Georgia, serif;
+  --font-grotesk: "Space Grotesk", "Inter", system-ui, sans-serif;
 
   /* V3 — "Studio OS": the site presents itself as a small software
      workspace, not a marketing page. Dark graphite canvas (never pure
@@ -26,7 +31,7 @@
   --color-amber-dim: #c98600;
   --color-ink-inverse: #0c0b11;
 
-  /* Process section character cast — one color per phase, see
+  /* Status palette (formerly the Process character cast) — see
      data/processCharacters.ts and components/ProcessCharacter.tsx. */
   --color-char-blue: #4d7bff;
   --color-char-green: #3ecf8e;
@@ -228,4 +233,75 @@ body::after {
 .text-outline {
   color: transparent;
   -webkit-text-stroke: 1px rgba(166, 161, 179, 0.28);
+}
+
+/* ── "The site that builds itself" — paper surface ───────────────────────
+   While the hero is still a sketch, <html data-surface="paper"> (see
+   lib/surface.ts). Anything fixed over it re-reads its colour tokens from
+   here, so the nav turns into dark ink on paper without code changes. */
+html[data-surface="paper"] header {
+  --color-ink: #2f2b26;
+  --color-ink-dim: #5d574d;
+  --color-ink-faint: #8a8377;
+  --color-bg-raised: #faf7f0;
+  --color-bg-line: #ebe4d6;
+  --color-border: #d9d1c1;
+}
+html[data-surface="paper"] header nav {
+  box-shadow: 0 8px 30px -12px rgba(47, 43, 38, 0.25);
+}
+html[data-surface="paper"] body::after,
+html[data-surface="paper"] [data-cursor-layer] {
+  opacity: 0;
+}
+body::after,
+[data-cursor-layer] {
+  transition: opacity 0.4s ease;
+}
+
+.font-hand {
+  font-family: var(--font-hand);
+}
+
+/* faint ruled sheet — a 24px grid with a stronger line every 5 squares */
+.paper-grid {
+  background-image:
+    linear-gradient(rgba(47, 43, 38, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(47, 43, 38, 0.07) 1px, transparent 1px),
+    linear-gradient(rgba(47, 43, 38, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(47, 43, 38, 0.035) 1px, transparent 1px);
+  background-size: 120px 120px, 120px 120px, 24px 24px, 24px 24px;
+  mask-image: radial-gradient(ellipse 90% 80% at 50% 45%, #000 40%, transparent 100%);
+}
+
+/* the pencil cursor (tip is the hotspot); links keep their pointer */
+.cursor-pencil {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cg transform='rotate(45 16 16)' stroke='%232f2b26' stroke-width='1.2' stroke-linejoin='round'%3E%3Crect x='13' y='2' width='6' height='20' fill='%23f4c542'/%3E%3Crect x='13' y='2' width='6' height='3.5' fill='%23e88aa0'/%3E%3Cpath d='M13 22 16 29 19 22Z' fill='%23f1d9b5'/%3E%3Cpath d='M15 26.6 16 29 17 26.6Z' fill='%232f2b26'/%3E%3C/g%3E%3C/svg%3E") 7 25, crosshair;
+}
+.cursor-pencil a,
+.cursor-pencil button {
+  cursor: pointer;
+}
+
+/* ── Work: "five ideas, five worlds" ───────────────────────────────────── */
+.font-grotesk {
+  font-family: var(--font-grotesk);
+}
+
+/* halftone wash over whatever colour the section has taken on */
+.halftone {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.16) 1px, transparent 1.4px);
+  background-size: 9px 9px;
+  mask-image: linear-gradient(115deg, #000 0%, transparent 45%, transparent 70%, #000 100%);
+  mix-blend-mode: soft-light;
+}
+
+/* signals running along Flow's wires */
+@keyframes flow-dash {
+  to {
+    stroke-dashoffset: -28;
+  }
+}
+.animate-flow-dash {
+  animation: flow-dash 0.9s linear infinite;
 }

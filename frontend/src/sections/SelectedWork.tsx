@@ -1,276 +1,191 @@
-import { useRef, useState } from "react"
-import { AnimatePresence, motion, useMotionValueEvent, useReducedMotion, useScroll } from "framer-motion"
+import { useCallback, useRef, useState, type ReactNode } from "react"
+import { AnimatePresence, motion, useInView, useReducedMotion } from "framer-motion"
 import { ArrowUpRight } from "lucide-react"
 import { projects, type Project } from "../data/projects"
-import { WindowChrome } from "../components/WindowChrome"
-import { TypedText } from "../animations/TypedText"
-import { SectionLabel } from "../components/SectionLabel"
-import { TiltCard } from "../animations/TiltCard"
-import { scrollToTarget } from "../lib/scroll"
+import { RESTING, WORLDS } from "./work/themes"
+import { CaseOverlay } from "./work/CaseOverlay"
+import { AiWorkspaceMini } from "./work/minis/AiWorkspaceMini"
+import { MaisonMini } from "./work/minis/MaisonMini"
+import { PulseMini } from "./work/minis/PulseMini"
+import { AtlasMini } from "./work/minis/AtlasMini"
+import { FlowMini } from "./work/minis/FlowMini"
 
-const TAB_TINTS = ["", "mix-blend-multiply bg-accent/15", "mix-blend-multiply bg-amber/15"]
-const PROJECT_COUNT = projects.length
-
-function IndexItem({ project, isActive, onSelect }: { project: Project; isActive: boolean; onSelect: () => void }) {
-  return (
-    <button
-      type="button"
-      data-testid={`work-index-${project.id}`}
-      data-active={isActive}
-      onClick={onSelect}
-      className={`group flex w-full items-baseline gap-4 border-b border-border py-3 text-left transition-colors first:border-t sm:py-3.5 ${
-        isActive ? "text-ink" : "text-ink-faint hover:text-ink-dim"
-      }`}
-    >
-      <span className={`font-mono text-xs ${isActive ? "text-accent" : ""}`}>{project.index}</span>
-      <div className="flex-1">
-        <h3 className="font-display text-lg font-bold tracking-tight sm:text-xl">{project.name}</h3>
-        <span className="font-mono text-[11px] uppercase tracking-[0.1em] text-ink-faint">{project.category}</span>
-      </div>
-      <ArrowUpRight
-        size={18}
-        className={`shrink-0 transition-all duration-300 ${
-          isActive ? "translate-x-0 opacity-100 text-accent" : "-translate-x-1 opacity-0 group-hover:opacity-60"
-        }`}
-      />
-    </button>
-  )
+/** bento placement: desktop is a 12 × 2 collage, tablet two columns */
+const SPAN: Record<string, string> = {
+  "ai-workspace": "md:row-span-2 lg:col-span-4 lg:row-span-2",
+  maison: "lg:col-span-5",
+  pulse: "lg:col-span-3",
+  atlas: "lg:col-span-3",
+  flow: "lg:col-span-5",
 }
 
-function ProjectWindow({ project, dominant }: { project: Project; dominant: boolean }) {
-  const [activePage, setActivePage] = useState(0)
-  const prefersReducedMotion = useReducedMotion()
+/** each tile lands from a slightly different angle, like pinned prints */
+const LAND_ROTATION = [-4, 3, -2, 4, -3]
 
-  return (
-    <div data-testid={dominant ? "work-active-window" : undefined}>
-      <WindowChrome label={`${project.id}.app — ${project.pages[activePage].toLowerCase()}`}>
-        <div className="relative h-[220px] w-full overflow-hidden sm:h-[300px] md:h-[360px]">
-          <img src={project.image.src} alt={project.image.alt} className="h-full w-full object-cover" loading="lazy" />
-          {prefersReducedMotion ? (
-            <div className={`absolute inset-0 ${TAB_TINTS[activePage % TAB_TINTS.length]}`} />
-          ) : (
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activePage}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.25 }}
-                className={`absolute inset-0 ${TAB_TINTS[activePage % TAB_TINTS.length]}`}
-              />
-            </AnimatePresence>
-          )}
-          <span
-            data-testid={dominant ? "work-status-badge" : undefined}
-            className="absolute left-3 top-3 rounded-full bg-bg/90 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.1em] text-ink"
-          >
-            {project.status}
-          </span>
-        </div>
-
-        {dominant && (
-          <div className="relative flex border-t border-border">
-            {!prefersReducedMotion && (
-              <motion.span
-                layoutId="work-tab-indicator"
-                transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                className="absolute inset-y-0 bg-accent/25"
-                style={{ width: `${100 / project.pages.length}%`, left: `${(100 / project.pages.length) * activePage}%` }}
-              />
-            )}
-            {project.pages.map((page, i) => (
-              <button
-                key={page}
-                type="button"
-                onClick={() => setActivePage(i)}
-                className={`relative z-10 flex-1 border-r border-border py-2.5 font-mono text-[11px] uppercase tracking-[0.1em] transition-colors last:border-r-0 ${
-                  activePage === i ? "text-ink" : "text-ink-faint hover:text-ink-dim"
-                }`}
-              >
-                {page}
-              </button>
-            ))}
-          </div>
-        )}
-      </WindowChrome>
-    </div>
-  )
-}
-
-export function SelectedWork() {
-  const trackRef = useRef<HTMLDivElement>(null)
-  const prefersReducedMotion = useReducedMotion()
-  const [activeIndex, setActiveIndex] = useState(0)
-  const active = projects[activeIndex]
-
-  // A fixed-height scroll track (not the content's natural height) controls
-  // how far the visitor scrolls to move through all five projects — the
-  // whole journey stays inside ~2.2 viewport heights on desktop, regardless
-  // of how much project copy exists. On mobile there's no explicit height
-  // (and no sticky pin below), so it's naturally short.
-  const { scrollYProgress } = useScroll({ target: trackRef, offset: ["start start", "end end"] })
-
-  useMotionValueEvent(scrollYProgress, "change", (v) => {
-    setActiveIndex(Math.min(PROJECT_COUNT - 1, Math.max(0, Math.floor(v * PROJECT_COUNT))))
-  })
-
-  function goToIndex(i: number) {
-    setActiveIndex(i)
-    const track = trackRef.current
-    if (!track) return
-    // useScroll's "start start" → "end end" maps v=0 to scrollY===trackTop
-    // and v=1 to scrollY===trackTop + (trackHeight - viewportHeight) — the
-    // pin range, not the full track height — so the scroll target must use
-    // that same denominator or it overshoots/undershoots the intended band.
-    const pinRange = track.offsetHeight - window.innerHeight
-    if (pinRange <= 0) return // mobile / no pin range — click state alone is enough
-    const rect = track.getBoundingClientRect()
-    const trackTop = window.scrollY + rect.top
-    const fraction = (i + 0.5) / PROJECT_COUNT
-    scrollToTarget(trackTop + fraction * pinRange)
+function Mini({ id, live }: { id: string; live: boolean }) {
+  switch (id) {
+    case "ai-workspace":
+      return <AiWorkspaceMini live={live} />
+    case "maison":
+      return <MaisonMini />
+    case "pulse":
+      return <PulseMini live={live} />
+    case "atlas":
+      return <AtlasMini />
+    default:
+      return <FlowMini live={live} />
   }
+}
 
-  const prevProject = projects[(activeIndex - 1 + PROJECT_COUNT) % PROJECT_COUNT]
-  const nextProject = projects[(activeIndex + 1) % PROJECT_COUNT]
+function Tile({
+  project,
+  order,
+  reduced,
+  dimmed,
+  onHover,
+  onOpen,
+  children,
+}: {
+  project: Project
+  order: number
+  reduced: boolean
+  dimmed: boolean
+  onHover: () => void
+  onOpen: () => void
+  children: ReactNode
+}) {
+  const w = WORLDS[project.id]
+  return (
+    <motion.article
+      data-testid={`work-tile-${project.id}`}
+      onPointerEnter={onHover}
+      onFocusCapture={onHover}
+      initial={reduced ? false : { opacity: 0, y: 60, rotate: LAND_ROTATION[order] }}
+      whileInView={{ opacity: 1, y: 0, rotate: 0 }}
+      viewport={{ once: true, amount: 0.15 }}
+      transition={{ type: "spring", stiffness: 120, damping: 18, delay: order * 0.08 }}
+      style={{ background: w.tile.bg, color: w.tile.fg }}
+      className={`track-snap relative flex h-[30rem] w-[86vw] max-w-md shrink-0 flex-col overflow-hidden rounded-2xl shadow-[0_24px_60px_-24px_rgba(0,0,0,0.55)] transition-[filter,opacity] duration-500 md:h-auto md:w-auto md:max-w-none ${
+        SPAN[project.id]
+      } ${dimmed ? "opacity-60 saturate-50" : ""}`}
+    >
+      <header className="flex items-center gap-2.5 border-b px-3.5 py-2.5" style={{ borderColor: `${w.tile.fg}1f` }}>
+        <span className="font-mono text-[10px] opacity-50">{project.index}</span>
+        <h3 className={`${w.font} truncate text-sm font-bold tracking-tight`}>{project.name}</h3>
+        <span
+          data-testid={`work-status-${project.id}`}
+          className="-rotate-3 px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.12em]"
+          style={{ background: w.tile.fg, color: w.tile.bg }}
+        >
+          {project.status}
+        </span>
+        <button
+          type="button"
+          onClick={onOpen}
+          data-testid={`work-open-${project.id}`}
+          aria-label={`Open the ${project.name} case`}
+          className="group/open ml-auto flex shrink-0 items-center gap-1 rounded-full border px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.1em] transition-colors"
+          style={{ borderColor: `${w.tile.fg}40` }}
+        >
+          open case
+          <ArrowUpRight size={12} className="transition-transform group-hover/open:-translate-y-0.5 group-hover/open:translate-x-0.5" />
+        </button>
+      </header>
+      <div className="relative min-h-0 flex-1">{children}</div>
+    </motion.article>
+  )
+}
+
+/**
+ * Selected Work — five concept products, five completely different worlds,
+ * all on one screen. Every tile is a small working interface (not a
+ * screenshot), and hovering one lets that product take over the section.
+ */
+export function SelectedWork() {
+  const ref = useRef<HTMLElement>(null)
+  const reduced = Boolean(useReducedMotion())
+  const inView = useInView(ref, { amount: 0.15 })
+  const live = inView && !reduced
+  const [hovered, setHovered] = useState<string | null>(null)
+  const [open, setOpen] = useState<Project | null>(null)
+  const closeCase = useCallback(() => setOpen(null), [])
+  const theme = hovered ? WORLDS[hovered].takeover : RESTING
+  const hoveredProject = projects.find((p) => p.id === hovered)
 
   return (
-    <section id="work" className="relative scroll-mt-24 bg-bg py-16 md:py-24">
-      <div className="container-studio">
-        <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-          <div>
-            <SectionLabel index="01" label="work" className="mb-6" />
-            <h2 className="font-display max-w-2xl text-balance text-4xl font-bold leading-[1.02] tracking-tight text-ink sm:text-5xl md:text-6xl">
-              <TypedText text="Made by our team." speed={0.03} cursor={false} />
-            </h2>
-            <p className="mt-4 max-w-md text-balance font-mono text-xs leading-relaxed text-ink-dim">
-              From early ideas to larger digital products, we design and
-              build websites and apps from start to finish.
-            </p>
-          </div>
-          <p className="max-w-sm text-balance font-mono text-xs leading-relaxed text-ink-dim">
-            Studio-built concepts and experiments — a look at how we think,
-            design, and build. Not real client work. Select one to bring it
-            forward.
-          </p>
+    <motion.section
+      id="work"
+      ref={ref}
+      animate={{ backgroundColor: theme.bg, color: theme.fg }}
+      initial={false}
+      transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+      className="relative overflow-hidden py-14 sm:py-16"
+    >
+      <div aria-hidden="true" className="halftone pointer-events-none absolute inset-0" />
+
+      <div className="container-studio relative">
+        <div className="flex flex-wrap items-center justify-between gap-3 font-mono text-[11px] uppercase tracking-[0.15em]">
+          <span>
+            <span className="opacity-60">01 //</span> work — made by our team
+          </span>
+          <span className="opacity-70">studio concepts &amp; experiments · not real client work</span>
         </div>
 
-        {/* The kinetic project stage — one viewport, five projects, rather
-            than five cards stacked down the page. */}
-        <div ref={trackRef} className="relative mt-8 md:mt-10 md:h-[220vh]">
-          <div className="grid grid-cols-1 gap-8 md:sticky md:top-28 md:grid-cols-12 md:gap-8">
-            {/* accessible primary selector — the definitive way to browse,
-                on both desktop and mobile, and always keyboard-reachable */}
-            <div className="md:col-span-4">
-              {projects.map((project, i) => (
-                <IndexItem
-                  key={project.id}
-                  project={project}
-                  isActive={i === activeIndex}
-                  onSelect={() => goToIndex(i)}
-                />
-              ))}
-            </div>
-
-            <div className="md:col-span-8">
-              <div
-                className="relative h-[300px] overflow-hidden rounded-2xl border border-border bg-bg-raised sm:h-[400px] md:h-[480px]"
-                data-testid="work-stage"
+        <div className="mt-5 flex flex-wrap items-end justify-between gap-4">
+          <h2 className="text-[clamp(2.6rem,5.6vw,5rem)] leading-[0.88] tracking-tight">
+            <span className="font-serif italic">Five</span> <span className="font-mono text-[0.72em] uppercase">ideas,</span>
+            <br />
+            <span className="font-grotesk font-bold">five</span>{" "}
+            <span className="font-display font-bold">
+              worlds<span className="text-accent">.</span>
+            </span>
+          </h2>
+          <div className="h-12 min-w-56 font-mono md:text-right text-xs uppercase tracking-[0.15em]">
+            <AnimatePresence mode="wait">
+              <motion.p
+                key={hoveredProject?.id ?? "none"}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.2 }}
               >
-                {/* Secondary windows — depth, not clutter: only the
-                    immediate neighbors, well behind and dimmed, never
-                    covering the active window's readability. */}
-                {!prefersReducedMotion && (
+                {hoveredProject ? (
                   <>
-                    <motion.button
-                      type="button"
-                      onClick={() => goToIndex((activeIndex - 1 + PROJECT_COUNT) % PROJECT_COUNT)}
-                      aria-label={`Go to ${prevProject.name}`}
-                      initial={false}
-                      animate={{ opacity: 0.35, scale: 0.82, rotate: -6, x: "-58%", y: "-6%" }}
-                      className="absolute left-1/2 top-1/2 z-0 w-[70%] -translate-x-1/2 -translate-y-1/2"
-                    >
-                      <WindowChrome label={`${prevProject.id}.app`} className="shadow-xl shadow-black/40">
-                        <img src={prevProject.image.src} alt={prevProject.image.alt} className="aspect-[4/3] w-full object-cover" loading="lazy" />
-                      </WindowChrome>
-                    </motion.button>
-                    <motion.button
-                      type="button"
-                      onClick={() => goToIndex((activeIndex + 1) % PROJECT_COUNT)}
-                      aria-label={`Go to ${nextProject.name}`}
-                      initial={false}
-                      animate={{ opacity: 0.4, scale: 0.86, rotate: 6, x: "58%", y: "8%" }}
-                      className="absolute left-1/2 top-1/2 z-0 w-[70%] -translate-x-1/2 -translate-y-1/2"
-                    >
-                      <WindowChrome label={`${nextProject.id}.app`} className="shadow-xl shadow-black/40">
-                        <img src={nextProject.image.src} alt={nextProject.image.alt} className="aspect-[4/3] w-full object-cover" loading="lazy" />
-                      </WindowChrome>
-                    </motion.button>
+                    <span className="opacity-60">now inside</span>
+                    <span className="block text-base font-bold normal-case tracking-normal">{hoveredProject.category}</span>
                   </>
-                )}
-
-                {/* The active project — one application window replacing
-                    another, like a creative-software workspace switch. */}
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={active.id}
-                    initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.9, y: 24, rotate: -1.5 }}
-                    animate={{ opacity: 1, scale: 1, y: 0, rotate: 0 }}
-                    exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.94, y: -18, rotate: 1.5 }}
-                    transition={
-                      prefersReducedMotion
-                        ? { duration: 0.3 }
-                        : { type: "spring", stiffness: 220, damping: 22, mass: 0.6 }
-                    }
-                    className="absolute inset-0 z-10 flex items-center justify-center p-4 sm:p-6"
-                  >
-                    <TiltCard className="w-full max-w-[560px]">
-                      <div className="shadow-[0_30px_70px_-20px_rgba(0,0,0,0.7)]">
-                        <ProjectWindow project={active} dominant />
-                      </div>
-                    </TiltCard>
-                  </motion.div>
-                </AnimatePresence>
-
-                <div className="absolute inset-x-0 bottom-0 z-20 flex items-center justify-between border-t border-border bg-bg-raised/90 px-4 py-2.5 backdrop-blur-sm">
-                  <span className="font-mono text-[11px] uppercase tracking-[0.15em] text-ink-faint">
-                    {active.index}/{String(PROJECT_COUNT).padStart(2, "0")} — {active.name}
+                ) : (
+                  <span className="opacity-70">
+                    <span className="hidden md:inline">hover a world — each one is live ↘</span>
+                    <span className="md:hidden">each one is live — swipe for more →</span>
                   </span>
-                  <div className="flex gap-1.5" aria-hidden="true">
-                    {projects.map((p, i) => (
-                      <span
-                        key={p.id}
-                        className="h-1.5 w-1.5 rounded-full transition-colors duration-300"
-                        style={{ backgroundColor: i === activeIndex ? "var(--color-accent)" : "var(--color-border)" }}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={active.id}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.25 }}
-                  className="mt-4"
-                >
-                  <p className="max-w-md text-balance text-sm leading-relaxed text-ink-dim">{active.description}</p>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {active.tags.map((tag) => (
-                      <span key={tag} className="rounded-full border border-border px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.1em] text-ink-dim">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                  <p className="mt-3 font-mono text-xs italic text-ink-faint">// concept exploration — not a live client site</p>
-                </motion.div>
-              </AnimatePresence>
-            </div>
+                )}
+              </motion.p>
+            </AnimatePresence>
           </div>
+        </div>
+
+        <div
+          onPointerLeave={() => setHovered(null)}
+          className="track-scroll -mx-[clamp(1.25rem,5vw,4rem)] mt-6 flex gap-3 overflow-x-auto px-[clamp(1.25rem,5vw,4rem)] pb-2 md:mx-0 md:grid md:auto-rows-[21rem] md:grid-cols-2 md:overflow-visible md:px-0 md:pb-0 lg:h-[clamp(30rem,calc(100svh-17rem),40rem)] lg:auto-rows-auto lg:grid-cols-12 lg:grid-rows-2"
+        >
+          {projects.map((p, i) => (
+            <Tile
+              key={p.id}
+              project={p}
+              order={i}
+              reduced={reduced}
+              dimmed={hovered !== null && hovered !== p.id}
+              onHover={() => setHovered(p.id)}
+              onOpen={() => setOpen(p)}
+            >
+              <Mini id={p.id} live={live} />
+            </Tile>
+          ))}
         </div>
       </div>
-    </section>
+
+      <AnimatePresence>{open && <CaseOverlay project={open} onClose={closeCase} />}</AnimatePresence>
+    </motion.section>
   )
 }

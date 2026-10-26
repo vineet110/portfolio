@@ -3,14 +3,12 @@ import { Hero } from "./sections/Hero"
 import { Marquee } from "./components/Marquee"
 import { SelectedWork } from "./sections/SelectedWork"
 import { Services } from "./sections/Services"
-import { Process } from "./sections/Process"
 import { FinalCta } from "./sections/FinalCta"
 import { Footer } from "./sections/Footer"
 import { ChatWidget } from "./components/ChatWidget"
 import { useEffect } from "react"
 import { Stack } from "./sections/Stack"
 import { Faq } from "./sections/Faq"
-import { Preloader } from "./components/Preloader"
 import { ScrollProgress } from "./components/ScrollProgress"
 import { CustomCursor } from "./components/CustomCursor"
 import { CommandPalette } from "./components/CommandPalette"
@@ -23,7 +21,6 @@ function App() {
 
   return (
     <div className="min-h-screen bg-bg">
-      <Preloader />
       <ScrollProgress />
       <Navigation />
       <main>
@@ -31,7 +28,6 @@ function App() {
         <Marquee items={marqueeItems} />
         <SelectedWork />
         <Services />
-        <Process />
         <Stack />
         <Faq />
         <FinalCta />
