@@ -72,8 +72,9 @@ Replaces the old one-project-at-a-time scroll track (too much scrolling).
   - **Pulse** — black/green trading terminal; prices tick live.
   - **Atlas** — phone app with swipeable stay cards.
   - **Flow** — lime node canvas; drag nodes and the wires follow.
-- [x] **3.3 Cobalt section + brand takeover** — the section is cobalt blue;
-  hovering a project floods the whole section in that project's colours.
+- [x] **3.3 Graphite section + brand takeover** — the section rests on
+  graphite like the rest of the site; hovering a project floods the whole
+  section in that project's colours.
 - [x] **3.4 "Open case" overlay** — full-screen case view per project (image,
   description, tags), keyboard and Esc friendly.
 - [x] **3.5 Keep CONCEPT / EXPERIMENTAL labels** on every tile and in the case
@@ -81,11 +82,19 @@ Replaces the old one-project-at-a-time scroll track (too much scrolling).
 - [x] **3.6 Calm when needed** — loops pause off-screen; reduced motion shows
   each mini-site in a still, finished state.
 
-## 4. Services — three drawn objects
+## 4. Services — "One object, three forms"
 
-- [ ] **4.1 Browser, phone, pen tool** — each of the three services is a
-  hand-drawn object that "inks in" as it enters the view.
-- [ ] **4.2 Exactly three services** — no new ones (see `docs/goal.md`).
+- [x] **4.1 Giant service names as tabs** — the active one solid, the others
+  in outline; arrow keys move between them.
+- [x] **4.2 One morphing device** — picking a service physically reshapes a
+  single object: a **browser** (a live site that scrolls itself), a
+  **phone** (an app that gets a notification) or a **design canvas**
+  (layers, selection handles, a collaborator cursor).
+- [x] **4.3 Autoplay** — cycles through the three while on screen, with a
+  progress line under the active name; stops once the visitor picks one.
+- [x] **4.4 Giant outlined word behind it** — WEB / APPS / UI/UX slides with
+  the form.
+- [x] **4.5 Exactly three services, no pricing** (see `docs/goal.md`).
 
 ## 5. Under the hood — the X-ray lens
 

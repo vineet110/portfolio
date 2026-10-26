@@ -11,8 +11,8 @@ export type WorldTheme = {
   font: string
 }
 
-/** The section's resting state: cobalt, nobody's brand in particular. */
-export const RESTING: WorldTheme["takeover"] = { bg: "#1f2bd1", fg: "#f3f0ea" }
+/** The section's resting state: graphite, continuing the dark site — the worlds bring the colour. */
+export const RESTING: WorldTheme["takeover"] = { bg: "#18171f", fg: "#f3f0ea" }
 
 export const WORLDS: Record<string, WorldTheme> = {
   "ai-workspace": {

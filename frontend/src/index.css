@@ -305,3 +305,19 @@ body::after,
 .animate-flow-dash {
   animation: flow-dash 0.9s linear infinite;
 }
+
+/* ── Services: the website form scrolls itself, like someone browsing ─── */
+@keyframes site-scroll {
+  0%, 20% {
+    transform: translateY(0);
+  }
+  55%, 75% {
+    transform: translateY(-38%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+.animate-site-scroll {
+  animation: site-scroll 7s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}

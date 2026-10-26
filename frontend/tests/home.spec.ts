@@ -204,27 +204,44 @@ test.describe("Services", () => {
     for (const name of ["Websites", "Mobile Apps", "UI/UX Design"]) {
       await expect(section.getByRole("heading", { level: 3, name })).toBeVisible()
     }
+    await expect(section.getByRole("tab")).toHaveCount(3)
 
     // Locked to exactly three services — no pricing tiers or plans shown.
     await expect(section.getByText(/pricing|starting at|per month|price/i)).toHaveCount(0)
   })
 
-  test("opening a service reveals its detail and its own supporting image", async ({ page }) => {
+  test("picking a service morphs the one device into that form, with its own detail and image", async ({ page }) => {
+    await page.goto("/")
+    const section = page.locator("#services")
+    await section.scrollIntoViewIfNeeded()
+    const device = section.getByTestId("service-device")
+
+    await section.getByTestId("service-toggle-mobile").click()
+    await expect(device).toHaveAttribute("data-form", "mobile")
+    await expect(section.getByTestId("service-toggle-mobile")).toHaveAttribute("aria-selected", "true")
+    await expect(
+      section.getByTestId("service-detail-mobile").getByText(/designed and built around how people actually use a phone/)
+    ).toBeVisible()
+    const mobileImg = await device.locator("img").first().getAttribute("src")
+    const tall = (await device.boundingBox())!
+
+    await section.getByTestId("service-toggle-design").click()
+    await expect(device).toHaveAttribute("data-form", "design")
+    await page.waitForTimeout(1200)
+    const wide = (await device.boundingBox())!
+    expect(wide.width).toBeGreaterThan(tall.width * 1.5)
+    expect(await device.locator("img").first().getAttribute("src")).not.toBe(mobileImg)
+  })
+
+  test("the service tabs are keyboard-operable with arrow keys", async ({ page }) => {
     await page.goto("/")
     const section = page.locator("#services")
     await section.scrollIntoViewIfNeeded()
 
-    await section.getByTestId("service-toggle-mobile").click()
-    const mobileDetail = section.getByTestId("service-detail-mobile")
-    await expect(mobileDetail.getByText(/designed and built around how people actually use a phone/)).toBeVisible()
-    const mobileImgSrc = await mobileDetail.locator("img").getAttribute("src")
-
-    await section.getByTestId("service-toggle-design").click()
-    const designDetail = section.getByTestId("service-detail-design")
-    await expect(designDetail.locator("img")).toHaveAttribute("src", /.+/)
-    const designImgSrc = await designDetail.locator("img").getAttribute("src")
-
-    expect(designImgSrc).not.toBe(mobileImgSrc)
+    await section.getByTestId("service-toggle-websites").click()
+    await page.keyboard.press("ArrowDown")
+    await expect(section.getByTestId("service-toggle-mobile")).toBeFocused()
+    await expect(section.getByTestId("service-device")).toHaveAttribute("data-form", "mobile")
   })
 })
 
