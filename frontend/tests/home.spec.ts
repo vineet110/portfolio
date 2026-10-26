@@ -245,6 +245,32 @@ test.describe("Services", () => {
   })
 })
 
+test.describe("Under the hood", () => {
+  test("shows the site's real stack as five layers, with a live API check and no vendor names", async ({ page }) => {
+    await page.goto("/")
+    const section = page.locator("#stack")
+    await section.scrollIntoViewIfNeeded()
+
+    for (const name of ["Interface", "Assistant", "API", "Data", "Quality"]) {
+      await expect(section.getByRole("heading", { level: 3, name, exact: true })).toBeVisible()
+    }
+    await expect(section.getByTestId("api-status")).toContainText("api:")
+    await expect(section.getByText(/vercel|render|railway|aws|groq|openai|supabase|neon/i)).toHaveCount(0)
+  })
+
+  test("hovering or focusing a layer makes it the active one", async ({ page }) => {
+    await page.goto("/")
+    const section = page.locator("#stack")
+    await section.scrollIntoViewIfNeeded()
+
+    await section.getByTestId("stack-layer-data").hover()
+    await expect(section.getByTestId("stack-layer-data")).toHaveAttribute("aria-pressed", "true")
+    await section.getByTestId("stack-layer-quality").focus()
+    await expect(section.getByTestId("stack-layer-quality")).toHaveAttribute("aria-pressed", "true")
+    await expect(section.getByTestId("stack-layer-data")).toHaveAttribute("aria-pressed", "false")
+  })
+})
+
 test.describe("Process (told by the hero)", () => {
   test("names all five stages under the corrected heading", async ({ page }) => {
     await page.goto("/")

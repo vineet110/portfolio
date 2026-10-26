@@ -96,11 +96,17 @@ Replaces the old one-project-at-a-time scroll track (too much scrolling).
   the form.
 - [x] **4.5 Exactly three services, no pricing** (see `docs/goal.md`).
 
-## 5. Under the hood — the X-ray lens
+## 5. Under the hood — "This website, exploded"
 
-- [ ] **5.1 The section *is* the lens** — moving over it reveals this site's
-  real stack and layout underneath the finished surface.
-- [ ] **5.2 Real stack only** — no vendor or hosting names.
+- [x] **5.1 Exploded view** — this site drawn as five stacked 3D glass
+  layers (Interface, Assistant, API, Data, Quality) that separate as the
+  section scrolls in; each layer is drawn as what it does.
+- [x] **5.2 Hover / focus to lift a layer** — it rises out of the stack with
+  a glow, and its callout lists the real tech; cycles on its own otherwise.
+- [x] **5.3 Live API check** — a real request from the visitor's browser,
+  shown on the API layer with its latency.
+- [x] **5.4 Real stack only** — no vendor or hosting names (test-guarded).
+- [x] **5.5 Principles as a spec strip** — fast, accessible, secure, tested.
 
 ## 6. FAQ — margin notes
 
