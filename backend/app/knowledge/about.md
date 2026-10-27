@@ -1,13 +1,11 @@
-# About the studio
+# About Sapvy
 
 ## Who we are
-We're a creative digital studio that designs and builds websites and apps
+We're Sapvy, a creative digital studio that designs and builds websites and apps
 for startups, businesses, and founders. We make websites and apps — if you
 have an idea, we design and build it.
 
-No formal company name, logo, or brand identity has been finalized yet —
-the site currently uses a placeholder studio mark while that decision is
-made.
+The studio's name is Sapvy. The website lives at sapvy.vercel.app.
 
 ## Who we work with
 Mostly startups, small and medium businesses, and individual founders —

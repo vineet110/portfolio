@@ -27,7 +27,7 @@ export function FinalLayer({ bp }: { bp: Blueprint }) {
           <span key={c} className="aspect-square w-[1.1cqw] min-w-1.5 rounded-full" style={{ background: c }} />
         ))}
         <span className="ml-[1cqw] font-mono text-ink-faint" style={{ fontSize: `${t.ui}cqw` }}>
-          studio.app
+          sapvy.app
         </span>
       </div>
 
@@ -36,7 +36,7 @@ export function FinalLayer({ bp }: { bp: Blueprint }) {
         className="font-display absolute flex items-center font-bold lowercase tracking-tight text-ink"
         style={{ ...place(bp, bp.logo), fontSize: `${t.logo}cqw` }}
       >
-        studio<span className="text-accent">.</span>
+        sapvy<span className="text-accent">.</span>
       </span>
 
       {bp.nav && (

@@ -32,7 +32,7 @@ export function Footer() {
         <div className="flex flex-col gap-12 md:flex-row md:items-start md:justify-between">
           <div>
             <a href="#top" className="font-display text-2xl font-bold lowercase tracking-tight text-ink">
-              studio<span className="text-accent">.</span>
+              sapvy<span className="text-accent">.</span>
             </a>
             <p className="mt-4 max-w-xs font-mono text-xs leading-relaxed text-ink-dim">
               we make websites and apps. have an idea? we design and build it.
@@ -82,7 +82,7 @@ export function Footer() {
 
         <div className="mt-12 flex flex-col gap-4 border-t border-border pt-6 font-mono text-[11px] text-ink-faint md:flex-row md:items-center md:justify-between">
           <span>© {new Date().getFullYear()} — all rights reserved.</span>
-          <span>designed &amp; built by the studio itself.</span>
+          <span>designed &amp; built by sapvy itself.</span>
         </div>
       </motion.div>
 

@@ -10,7 +10,7 @@ test.describe("Page load", () => {
     const response = await page.goto("/")
     expect(response?.ok()).toBeTruthy()
 
-    await expect(page).toHaveTitle(/studio/i)
+    await expect(page).toHaveTitle(/sapvy/i)
     await expect(page.locator("main")).toBeVisible()
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible()
 

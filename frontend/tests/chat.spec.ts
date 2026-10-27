@@ -41,7 +41,7 @@ async function sendChatMessage(page: Page, text: string) {
   await page.getByRole("button", { name: "Send message" }).click()
 }
 
-test.describe("Studio Assistant chatbot", () => {
+test.describe("Sapvy Assistant chatbot", () => {
   test("launcher is visible on load", async ({ page }) => {
     await page.goto("/")
     await expect(page.getByTestId("chat-launcher")).toBeVisible()
@@ -52,7 +52,7 @@ test.describe("Studio Assistant chatbot", () => {
     await page.getByTestId("chat-launcher").click()
 
     await expect(page.getByTestId("chat-panel")).toBeVisible()
-    await expect(page.getByTestId("chat-greeting")).toContainText("Studio Assistant")
+    await expect(page.getByTestId("chat-greeting")).toContainText("Sapvy Assistant")
 
     const quickPrompts = page.getByTestId("chat-quick-prompts")
     await expect(quickPrompts.getByRole("button", { name: "What do you offer?" })).toBeVisible()
@@ -139,7 +139,7 @@ test.describe("Studio Assistant chatbot", () => {
   })
 })
 
-test.describe("Studio Assistant lead capture", () => {
+test.describe("Sapvy Assistant lead capture", () => {
   test("first two messages behave normally, no capture prompt", async ({ page }) => {
     await mockChatApi(page)
     await mockChatLeadApi(page)

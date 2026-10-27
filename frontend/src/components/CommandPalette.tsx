@@ -37,7 +37,7 @@ export function CommandPalette() {
       { id: "stack", label: "Under the hood", group: "Navigate", icon: <Cpu size={15} />, hint: "04", run: () => scrollToTarget("#stack") },
       { id: "faq", label: "FAQ", group: "Navigate", icon: <HelpCircle size={15} />, hint: "05", run: () => scrollToTarget("#faq") },
       { id: "contact", label: "Contact form", group: "Navigate", icon: <Send size={15} />, hint: "06", run: () => scrollToTarget("#contact") },
-      { id: "chat", label: "Ask the Studio Assistant", group: "Connect", icon: <MessageSquareText size={15} />, run: () => openChat() },
+      { id: "chat", label: "Ask the Sapvy Assistant", group: "Connect", icon: <MessageSquareText size={15} />, run: () => openChat() },
       {
         id: "whatsapp",
         label: "Chat on WhatsApp",
@@ -199,7 +199,7 @@ export function CommandPalette() {
             </ul>
 
             <div className="flex items-center justify-between border-t border-border px-4 py-2.5 font-mono text-[10px] uppercase tracking-[0.15em] text-ink-faint">
-              <span>studio — command</span>
+              <span>sapvy — command</span>
               <span className="flex items-center gap-3">
                 <span>↑↓ move</span>
                 <span>↵ open</span>

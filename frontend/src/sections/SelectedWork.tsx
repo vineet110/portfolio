@@ -128,7 +128,7 @@ export function SelectedWork() {
           <span>
             <span className="opacity-60">01 //</span> work — made by our team
           </span>
-          <span className="opacity-70">studio concepts &amp; experiments · not real client work</span>
+          <span className="opacity-70">sapvy concepts &amp; experiments · not real client work</span>
         </div>
 
         <div className="mt-5 flex flex-wrap items-end justify-between gap-4">

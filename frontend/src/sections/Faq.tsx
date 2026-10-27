@@ -118,7 +118,7 @@ export function Faq() {
                   <Sparkles size={16} />
                 </span>
                 <span className="leading-tight">
-                  <span className="block font-display text-sm font-bold text-ink">studio.</span>
+                  <span className="block font-display text-sm font-bold text-ink">sapvy.</span>
                   <span className="flex items-center gap-1.5 font-mono text-[10px] text-ink-faint">
                     <span className="h-1.5 w-1.5 rounded-full bg-char-green" /> usually replies instantly
                   </span>
@@ -146,7 +146,7 @@ export function Faq() {
                     {t.answered ? (
                       <Reply>{faqs[t.q].a}</Reply>
                     ) : (
-                      <span aria-label="studio is typing" className="flex w-fit gap-1 rounded-2xl rounded-bl-md bg-bg-line px-4 py-3">
+                      <span aria-label="sapvy is typing" className="flex w-fit gap-1 rounded-2xl rounded-bl-md bg-bg-line px-4 py-3">
                         {[0, 1, 2].map((d) => (
                           <motion.span
                             key={d}

@@ -4,7 +4,9 @@
  * base URL, error handling, and payload shapes live in exactly one place.
  */
 
-const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000"
+// In production the API is served from the same origin (vercel.json rewrites
+// /api/* to the backend), so an unset VITE_API_URL means "same origin".
+const API_URL = import.meta.env.VITE_API_URL ?? (import.meta.env.DEV ? "http://localhost:8000" : "")
 
 export class ApiError extends Error {
   status: number

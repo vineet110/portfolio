@@ -75,7 +75,7 @@ function draft(bp: Blueprint) {
   const s = bp.name === "landscape" ? 1 : 0.85
   const lineH = bp.h1.h / bp.scribble.length
   const notes: Note[] = [
-    { key: "logo", text: "studio.", x: bp.logo.x, y: bp.logo.y + bp.logo.h * 0.85, size: 30 * s, w: bp.logo.w },
+    { key: "logo", text: "sapvy.", x: bp.logo.x, y: bp.logo.y + bp.logo.h * 0.85, size: 30 * s, w: bp.logo.w },
     ...bp.scribble.map((t, i) => ({
       key: `h1-${i}`,
       text: t,

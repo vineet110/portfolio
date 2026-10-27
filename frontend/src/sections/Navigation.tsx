@@ -68,7 +68,7 @@ export function Navigation() {
           }`}
         >
           <a href="#top" className="font-display shrink-0 px-2.5 text-sm font-bold lowercase tracking-tight text-ink">
-            studio<span className="text-accent">.</span>
+            sapvy<span className="text-accent">.</span>
           </a>
 
           <span className="hidden h-4 w-px bg-border md:block" aria-hidden="true" />

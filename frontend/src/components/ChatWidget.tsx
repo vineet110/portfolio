@@ -16,7 +16,7 @@ type Message = {
 type PendingCapture = "name" | "email" | null
 
 const GREETING =
-  "Hi — I'm the Studio Assistant. Ask me about our services, work, process, or how we can help."
+  "Hi — I'm the Sapvy Assistant. Ask me about our services, work, process, or how we can help."
 
 const QUICK_PROMPTS = [
   "What do you offer?",
@@ -254,7 +254,7 @@ export function ChatWidget() {
         <motion.button
           type="button"
           data-testid="chat-launcher"
-          aria-label="Open Studio Assistant"
+          aria-label="Open Sapvy Assistant"
           onClick={() => setIsOpen(true)}
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -281,7 +281,7 @@ export function ChatWidget() {
           <motion.div
             data-testid="chat-panel"
             role="dialog"
-            aria-label="Studio Assistant chat"
+            aria-label="Sapvy Assistant chat"
             initial={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 28, scale: 0.96 }}
             animate={prefersReducedMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
             exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 28, scale: 0.96 }}
@@ -296,7 +296,7 @@ export function ChatWidget() {
                   <span className="h-2 w-2 rounded-full bg-[#febc2e]" />
                   <span className="h-2 w-2 rounded-full bg-[#28c840]" />
                 </span>
-                studio-assistant
+                sapvy-assistant
               </p>
               <div className="flex items-center gap-4">
                 <button
