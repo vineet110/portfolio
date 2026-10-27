@@ -122,9 +122,16 @@ Replaces the old one-project-at-a-time scroll track (too much scrolling).
 
 ## 7. Final CTA — "Your idea goes here"
 
-- [ ] **7.1 A blank sheet** the visitor types their idea onto.
-- [ ] **7.2 Hand off** — one click sends that text to the Studio Assistant
-  or WhatsApp, already filled in.
+- [x] **7.1 Back on paper** — the page ends where it began; the nav turns
+  paper-coloured again over this section.
+- [x] **7.2 A notebook sheet** (ruled lines, red margin) the visitor writes
+  their idea onto, in handwriting.
+- [x] **7.3 The sheet reads along** — Website / Web app / Mobile App /
+  UI/UX Design / AI inside light up as the idea mentions them.
+- [x] **7.4 Three ways out, same words** — WhatsApp opens with the idea
+  typed in; the assistant opens with it prefilled; "start a conversation"
+  folds out the enquiry fields with the project type pre-picked, and sends
+  through the real `/api/contact` (a "received ✓" stamp lands on success).
 
 ## 8. Site-wide polish
 

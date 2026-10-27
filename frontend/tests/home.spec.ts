@@ -362,62 +362,44 @@ test.describe("Process (told by the hero)", () => {
 })
 
 test.describe("Contact", () => {
-  test("shows the contact form with all expected fields and a submit button", async ({ page }) => {
+  test("the idea sheet notices what kind of product it is", async ({ page }) => {
     await page.goto("/")
     const section = page.locator("#contact")
     await section.scrollIntoViewIfNeeded()
 
-    const name = section.getByLabel("Name")
-    const email = section.getByLabel("Email")
-    const projectType = section.getByLabel("Project type")
-    const message = section.getByLabel("Tell us about it")
-    const submit = section.getByRole("button", { name: /send enquiry/i })
-
-    await expect(name).toBeVisible()
-    await expect(email).toBeVisible()
-    await expect(projectType).toBeVisible()
-    await expect(message).toBeVisible()
-    await expect(submit).toBeVisible()
-
-    await name.click()
-    await name.fill("Jane Doe")
-    await expect(name).toHaveValue("Jane Doe")
-
-    await email.fill("jane@example.com")
-    await expect(email).toHaveValue("jane@example.com")
-
-    await message.fill("We would like to discuss a new product build.")
-    await expect(message).toHaveValue("We would like to discuss a new product build.")
+    const sheet = section.getByLabel("Your idea")
+    await sheet.fill("An iOS app with an AI assistant for my bakery")
+    await expect(section.getByTestId("idea-signal-mobile")).toHaveAttribute("data-on", "true")
+    await expect(section.getByTestId("idea-signal-ai")).toHaveAttribute("data-on", "true")
+    await expect(section.getByTestId("idea-signal-design")).not.toHaveAttribute("data-on", "true")
   })
 
-  test("shows both primary contact actions side by side, equal weight", async ({ page }) => {
+  test("WhatsApp opens with the idea already written in", async ({ page }) => {
     await page.goto("/")
     const section = page.locator("#contact")
     await section.scrollIntoViewIfNeeded()
 
     const whatsapp = section.getByRole("link", { name: /chat on whatsapp/i })
-    await expect(whatsapp).toBeVisible()
     await expect(whatsapp).toHaveAttribute("href", WHATSAPP_URL)
     await expect(whatsapp).toHaveAttribute("target", "_blank")
     await expect(whatsapp).toHaveAttribute("rel", /noopener/)
 
-    const startConversation = section.getByRole("button", { name: /start a conversation/i })
-    await expect(startConversation).toBeVisible()
-
-    // Equal visual importance — same row on desktop (same top position).
-    const whatsappBox = await whatsapp.boundingBox()
-    const startBox = await startConversation.boundingBox()
-    expect(whatsappBox).not.toBeNull()
-    expect(startBox).not.toBeNull()
-    expect(Math.abs(whatsappBox!.y - startBox!.y)).toBeLessThan(12)
+    await section.getByLabel("Your idea").fill("A website for my bakery")
+    await expect(whatsapp).toHaveAttribute("href", `${WHATSAPP_URL}?text=${encodeURIComponent("Hi! Here's my idea: A website for my bakery")}`)
   })
 
-  test("start a conversation scrolls to and focuses the form", async ({ page }) => {
+  test("start a conversation reveals the enquiry fields, focuses Name, and pre-picks the project type", async ({ page }) => {
     await page.goto("/")
     const section = page.locator("#contact")
     await section.scrollIntoViewIfNeeded()
 
+    await section.getByLabel("Your idea").fill("We need a mobile app for booking dog walkers")
     await section.getByRole("button", { name: /start a conversation/i }).click()
     await expect(section.getByLabel("Name")).toBeFocused()
+    await expect(section.getByLabel("Project type")).toHaveValue("mobile")
+
+    await section.getByLabel("Name").fill("Jane Doe")
+    await section.getByLabel("Email").fill("jane@example.com")
+    await expect(section.getByRole("button", { name: /send enquiry/i })).toBeVisible()
   })
 })
