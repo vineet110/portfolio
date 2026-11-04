@@ -7,7 +7,7 @@ import { openPalette, scrollToTarget } from "../lib/scroll"
 const links = [
   { label: "work", href: "#work" },
   { label: "services", href: "#services" },
-  { label: "process", href: "#process" },
+  { label: "try it", href: "#build" },
   { label: "faq", href: "#faq" },
   { label: "contact", href: "#contact" },
 ]

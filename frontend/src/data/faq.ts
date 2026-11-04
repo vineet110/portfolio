@@ -25,8 +25,8 @@ export const faqs: { q: string; a: string }[] = [
     a: "No. Every project is scoped individually, because cost depends on what it actually needs. Get in touch and we'll figure out scope together.",
   },
   {
-    q: "Are the projects in the Work section real client work?",
-    a: "No — they're studio-built concept and experimental projects, clearly labeled as such. Real client work will be added, and marked as real, once it can be shown.",
+    q: "Is the work in the Work section real?",
+    a: "Yes — it's real work built by our team. Three are live websites you can open full size right on the page; the other four are platforms shown with product shots.",
   },
   {
     q: "How do I get started?",

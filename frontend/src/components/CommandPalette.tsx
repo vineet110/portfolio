@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react"
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion"
-import { ArrowUp, Briefcase, CornerDownLeft, HelpCircle, Layers, MessageCircle, MessageSquareText, Search, Send, Workflow, Cpu } from "lucide-react"
+import { ArrowUp, Briefcase, CornerDownLeft, HelpCircle, Layers, MessageCircle, MessageSquareText, Search, Send, Workflow, Rocket } from "lucide-react"
 import { whatsappUrl } from "../data/contact"
 import { OPEN_PALETTE_EVENT, openChat, scrollToTarget } from "../lib/scroll"
 
@@ -34,7 +34,7 @@ export function CommandPalette() {
       { id: "work", label: "Selected work", group: "Navigate", icon: <Briefcase size={15} />, hint: "01", run: () => scrollToTarget("#work") },
       { id: "services", label: "Services", group: "Navigate", icon: <Layers size={15} />, hint: "02", run: () => scrollToTarget("#services") },
       { id: "process", label: "Process", group: "Navigate", icon: <Workflow size={15} />, hint: "03", run: () => scrollToTarget("#process") },
-      { id: "stack", label: "Under the hood", group: "Navigate", icon: <Cpu size={15} />, hint: "04", run: () => scrollToTarget("#stack") },
+      { id: "build", label: "Try it: build your app", group: "Navigate", icon: <Rocket size={15} />, hint: "04", run: () => scrollToTarget("#build") },
       { id: "faq", label: "FAQ", group: "Navigate", icon: <HelpCircle size={15} />, hint: "05", run: () => scrollToTarget("#faq") },
       { id: "contact", label: "Contact form", group: "Navigate", icon: <Send size={15} />, hint: "06", run: () => scrollToTarget("#contact") },
       { id: "chat", label: "Ask the Sapvy Assistant", group: "Connect", icon: <MessageSquareText size={15} />, run: () => openChat() },

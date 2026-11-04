@@ -1,32 +1,42 @@
 # Selected work
 
 ## About this work
-The projects below are studio-authored concept and experimental
-explorations, not real client engagements. Each is clearly labeled CONCEPT
-or EXPERIMENTAL on the site and here — none of them represent an actual
-client, real revenue, or a real business outcome.
+Real projects built by our team. Three are live websites that visitors can
+open at full size right inside the Work section; the other four are
+platforms without a public address, shown with product shots.
 
-## AI Workspace (CONCEPT)
-Category: AI Product, Dashboard. An intelligent operations console that
-turns scattered business data into a single conversational workspace,
-built around retrieval rather than dashboards.
+## Tufger (LIVE)
+Category: Sports, Web App. A turf booking manager that splits every
+booking and collects each player's share over UPI, so nobody has to chase
+anyone for money. Live at https://tufger.vercel.app
 
-## Maison (CONCEPT)
-Category: Luxury Commerce. A quietly confident commerce experience for a
-fictional heritage goods house, built around restraint, pacing, and
-material detail rather than discount-driven UX.
+## Jewellery Store (LIVE)
+Category: Commerce, Website. An online store for hallmarked gold, silver
+and diamond jewellery — temple, kundan and bridal pieces, delivered insured
+across India. Live at https://jewellery-store-orcin.vercel.app/
 
-## Pulse (EXPERIMENTAL)
-Category: Fintech Interface. A trading and treasury interface exploring
-how dense financial data can stay legible under real-time pressure, with
-clarity prioritized over decoration.
+## Chinar Scientific (LIVE)
+Category: Education, Company Website. The website for Chinar Scientific
+Industries, a STEM, ICT and EdTech solutions partner for schools across
+India since 1984. Live at https://chinarscientific.in/
 
-## Atlas (CONCEPT)
-Category: Travel & Hospitality. A booking and itinerary platform for
-boutique hospitality brands, designed around discovery and anticipation
-rather than a checkout funnel.
+## WhatsApp Marketing Platform (CASE STUDY)
+Category: Healthcare, SaaS Platform. Campaign and appointment management
+for healthcare clients, delivering WhatsApp campaigns to 500,000 to
+1,000,000+ recipients on auto-scaling AWS infrastructure. Built with
+Node.js, React, PostgreSQL, MongoDB, Redis and the WhatsApp Cloud API.
 
-## Flow (EXPERIMENTAL)
-Category: Business Automation. An internal automation platform that lets
-non-technical teams compose business logic visually, with AI assistance
-handling the underlying orchestration.
+## Spark ERP (CASE STUDY)
+Category: Enterprise, ERP System. One centralized ERP, on web and mobile,
+for academics, students, exams, HR and finance. Built with React, React
+Native, Node.js and MongoDB.
+
+## Threat Accordme (CASE STUDY)
+Category: Education, Learning Platform. A learning management system with
+role-based access for admins, authors and learners. Built with React,
+Node.js and MySQL.
+
+## CTF Platform (CASE STUDY)
+Category: Cybersecurity, Challenge App. A real-time capture-the-flag
+platform with live challenges, submissions and a leaderboard over
+WebSockets. Built with React, Node.js, MySQL and Firebase Auth.

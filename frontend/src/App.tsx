@@ -7,7 +7,7 @@ import { FinalCta } from "./sections/FinalCta"
 import { Footer } from "./sections/Footer"
 import { ChatWidget } from "./components/ChatWidget"
 import { useEffect } from "react"
-import { Stack } from "./sections/Stack"
+import { AppBuilder } from "./sections/AppBuilder"
 import { Faq } from "./sections/Faq"
 import { ScrollProgress } from "./components/ScrollProgress"
 import { CustomCursor } from "./components/CustomCursor"
@@ -28,7 +28,7 @@ function App() {
         <Marquee items={marqueeItems} />
         <SelectedWork />
         <Services />
-        <Stack />
+        <AppBuilder />
         <Faq />
         <FinalCta />
       </main>

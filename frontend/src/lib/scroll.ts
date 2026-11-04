@@ -53,6 +53,14 @@ export function scrollToTarget(target: HTMLElement | number | string) {
 /** Cross-component events (command palette / FAQ → chat widget). */
 export const OPEN_CHAT_EVENT = "studio:open-chat"
 export const OPEN_PALETTE_EVENT = "studio:open-palette"
+export const PREFILL_IDEA_EVENT = "studio:prefill-idea"
+
+export type PrefillIdeaDetail = { text: string; type?: string }
+
+/** Build-your-app finale → writes the visitor's choices onto the contact sheet. */
+export function prefillIdea(text: string, type?: string) {
+  window.dispatchEvent(new CustomEvent<PrefillIdeaDetail>(PREFILL_IDEA_EVENT, { detail: { text, type } }))
+}
 
 export function openChat(prefill?: string) {
   window.dispatchEvent(new CustomEvent(OPEN_CHAT_EVENT, { detail: { prefill } }))

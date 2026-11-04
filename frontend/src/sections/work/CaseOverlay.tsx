@@ -1,13 +1,14 @@
 import { useEffect, useRef } from "react"
 import { motion } from "framer-motion"
-import { X } from "lucide-react"
-import type { Project } from "../../data/projects"
+import { ArrowUpRight, X } from "lucide-react"
+import { projects, type Project } from "../../data/projects"
 import { WORLDS } from "./themes"
+import { SitePreview } from "./SitePreview"
 
 /**
- * Full-screen case view for one concept project, dressed in that project's
- * own world. A real modal dialog: focus moves in, Esc / backdrop / close
- * button leave, and focus returns to whatever opened it.
+ * Full-screen view of one project, dressed in its own colours, with the
+ * site (or product shot) at full size. A real modal dialog: focus moves in,
+ * Esc / backdrop / close button leave, and focus returns to whatever opened it.
  */
 export function CaseOverlay({ project, onClose }: { project: Project; onClose: () => void }) {
   const w = WORLDS[project.id]
@@ -46,12 +47,12 @@ export function CaseOverlay({ project, onClose }: { project: Project; onClose: (
         transition={{ type: "spring", stiffness: 260, damping: 26 }}
         onClick={(e) => e.stopPropagation()}
         style={{ background: w.tile.bg, color: w.tile.fg }}
-        className="relative grid max-h-full w-full max-w-5xl overflow-y-auto rounded-2xl md:grid-cols-[1.2fr_1fr]"
+        className="relative grid max-h-full w-full max-w-6xl overflow-y-auto rounded-2xl lg:grid-cols-[1.7fr_1fr]"
       >
-        <div className="relative min-h-56 overflow-hidden md:min-h-[28rem]">
-          <img src={project.image.src} alt={project.image.alt} className="absolute inset-0 h-full w-full object-cover" />
+        <div className="relative h-[60svh] min-h-72 lg:h-[min(40rem,80svh)]">
+          <SitePreview project={project} />
           <span
-            className="absolute left-4 top-4 -rotate-3 px-2.5 py-1 font-mono text-[11px] font-bold uppercase tracking-[0.15em]"
+            className="pointer-events-none absolute left-4 top-4 -rotate-3 px-2.5 py-1 font-mono text-[11px] font-bold uppercase tracking-[0.15em]"
             style={{ background: w.tile.fg, color: w.tile.bg }}
           >
             {project.status}
@@ -60,7 +61,9 @@ export function CaseOverlay({ project, onClose }: { project: Project; onClose: (
 
         <div className="flex flex-col p-6 sm:p-8">
           <div className="flex items-start justify-between gap-4">
-            <span className="font-mono text-xs opacity-60">{project.index} / 05</span>
+            <span className="font-mono text-xs opacity-60">
+              {project.index} / {String(projects.length).padStart(2, "0")}
+            </span>
             <button
               ref={closeRef}
               type="button"
@@ -72,7 +75,7 @@ export function CaseOverlay({ project, onClose }: { project: Project; onClose: (
               <X size={16} />
             </button>
           </div>
-          <h3 id={`case-${project.id}`} className={`${w.font} mt-6 text-5xl font-bold leading-none tracking-tight sm:text-6xl`}>
+          <h3 id={`case-${project.id}`} className={`${w.font} mt-6 text-4xl font-bold leading-none tracking-tight sm:text-5xl`}>
             {project.name}
           </h3>
           <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.15em] opacity-60">{project.category}</p>
@@ -88,7 +91,21 @@ export function CaseOverlay({ project, onClose }: { project: Project; onClose: (
               </li>
             ))}
           </ul>
-          <p className="mt-auto pt-8 font-mono text-xs italic opacity-60">// concept exploration — not a live client site</p>
+          <div className="mt-auto pt-8">
+            {project.url ? (
+              <a
+                href={project.url}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 font-mono text-xs font-bold uppercase tracking-[0.1em]"
+                style={{ background: w.tile.accent, color: "#111" }}
+              >
+                visit the live site <ArrowUpRight size={14} />
+              </a>
+            ) : (
+              <p className="font-mono text-xs italic opacity-60">// private platform — shown with a product shot</p>
+            )}
+          </div>
         </div>
       </motion.div>
     </motion.div>

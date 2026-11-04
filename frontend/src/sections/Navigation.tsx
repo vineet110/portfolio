@@ -7,7 +7,7 @@ import { openPalette } from "../lib/scroll"
 const links = [
   { label: "work", href: "#work" },
   { label: "services", href: "#services" },
-  { label: "process", href: "#process" },
+  { label: "try it", href: "#build" },
   { label: "contact", href: "#contact" },
 ]
 

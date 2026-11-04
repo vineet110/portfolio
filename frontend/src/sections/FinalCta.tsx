@@ -3,7 +3,7 @@ import { AnimatePresence, motion, useInView, useReducedMotion } from "framer-mot
 import { ArrowUpRight, Loader2, MessageSquareText, PenLine } from "lucide-react"
 import { api, ApiError, type ProjectType } from "../services/api"
 import { whatsappUrl } from "../data/contact"
-import { openChat } from "../lib/scroll"
+import { PREFILL_IDEA_EVENT, openChat, type PrefillIdeaDetail } from "../lib/scroll"
 import { setSurface } from "../lib/surface"
 
 // Labels only — these map to the existing backend `project_type` values
@@ -81,6 +81,22 @@ export function FinalCta() {
     else if (wasInView.current) setSurface("ink")
     wasInView.current = inView
   }, [inView])
+
+  // "Build this for real" in the app builder hands its choices over
+  useEffect(() => {
+    const onPrefill = (e: Event) => {
+      const { text, type: t } = (e as CustomEvent<PrefillIdeaDetail>).detail
+      setIdea(text)
+      const known = projectTypes.find((p) => p.value === t)
+      if (known) {
+        setType(known.value)
+        setTypeTouched(true)
+      }
+      setWriting(true)
+    }
+    window.addEventListener(PREFILL_IDEA_EVENT, onPrefill)
+    return () => window.removeEventListener(PREFILL_IDEA_EVENT, onPrefill)
+  }, [])
 
   useEffect(() => {
     if (idea || reduced) return
