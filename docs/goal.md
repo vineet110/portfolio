@@ -71,8 +71,12 @@ rhythm — not "hover → card grows" everywhere. Must respect
 
 - No invented company name or logo.
 - No fake client logos, testimonials, or stats ("100+ clients", etc).
-- Portfolio projects are conceptual and must be clearly labeled
-  CONCEPT / EXPERIMENTAL — never presented as real client work.
+  Client names shown on the site are real companies the team has built
+  for, supplied by the owner (`frontend/src/data/clients.ts`) — never
+  made up to pad the list.
+- Work shown is real work by the team. Live sites are tagged LIVE; the
+  other projects carry no tag. Anything conceptual must still be clearly
+  labelled CONCEPT / EXPERIMENTAL — never presented as real client work.
 - Footer contains no invented address, phone, email, or social accounts.
 
 ## Studio Assistant chatbot
