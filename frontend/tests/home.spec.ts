@@ -127,13 +127,17 @@ test.describe("Work", () => {
     await page.setViewportSize({ width: 1440, height: 900 })
     await page.goto("/")
     const work = page.locator("#work")
-    for (const id of ["tufger", "jewellery", "chinar", "spark-erp", "threat-accordme", "ctf"]) {
-      await expect(work.getByTestId(`client-${id}`)).toBeAttached()
+    const wall = work.getByTestId("clients")
+    for (const name of ["Ambrane India", "ToyBharat", "Srikara", "Samagyo", "IPAD", "MV Manpower", "Occttro Fashion", "Chinar Scientific", "Spark", "BodhBox", "SkillXploit"]) {
+      await expect(wall.getByText(name, { exact: true })).toBeAttached()
     }
-    await work.getByTestId("client-chinar").scrollIntoViewIfNeeded()
-    await work.getByTestId("client-chinar").hover()
+    await expect(wall.getByText("Tufger", { exact: true })).toHaveCount(0)
+    await expect(wall.getByText("Jewellery Store", { exact: true })).toHaveCount(0)
+    const chinar = work.getByRole("button", { name: /Chinar Scientific — see the project/ })
+    await chinar.scrollIntoViewIfNeeded()
+    await chinar.hover()
     await expect(work.getByText("Education · Company Website").first()).toBeVisible()
-    await work.getByTestId("client-chinar").click()
+    await chinar.click()
     await expect(page.getByRole("dialog")).toContainText("Chinar Scientific")
   })
 
@@ -151,20 +155,21 @@ test.describe("Work", () => {
     await expect(section.getByText(/3 live sites · 4 platforms/i)).toBeVisible()
   })
 
-  test("shows all seven projects on one screen, live sites labelled LIVE", async ({ page }) => {
+  test("shows all seven projects on one screen, only live sites tagged", async ({ page }) => {
     const section = await gotoWork(page)
     const expected: Record<string, [string, string]> = {
       tufger: ["Tufger", "LIVE"],
       jewellery: ["Jewellery Store", "LIVE"],
       chinar: ["Chinar Scientific", "LIVE"],
-      whatsapp: ["WhatsApp Marketing Platform", "CASE STUDY"],
-      "spark-erp": ["Spark ERP", "CASE STUDY"],
-      "threat-accordme": ["Threat Accordme", "CASE STUDY"],
-      ctf: ["CTF Platform", "CASE STUDY"],
+      whatsapp: ["WhatsApp Marketing Platform", ""],
+      "spark-erp": ["Spark ERP", ""],
+      "threat-accordme": ["Threat Accordme", ""],
+      ctf: ["CTF Platform", ""],
     }
     for (const [id, [name, status]] of Object.entries(expected)) {
       await expect(section.getByTestId(`work-tile-${id}`)).toBeInViewport()
-      await expect(section.getByTestId(`work-status-${id}`)).toHaveText(status)
+      if (status) await expect(section.getByTestId(`work-status-${id}`)).toHaveText(status)
+      else await expect(section.getByTestId(`work-status-${id}`)).toHaveCount(0)
       await expect(section.getByTestId(`work-tile-${id}`).getByRole("heading", { level: 3, name, exact: true })).toBeVisible()
     }
   })
@@ -172,7 +177,8 @@ test.describe("Work", () => {
   test("is compact — no tall scroll track", async ({ page }) => {
     const section = await gotoWork(page)
     const box = await section.boundingBox()
-    expect(box!.height).toBeLessThan(900 * 1.3)
+    // grid + clients wall; a pinned scroll track would be several screens tall
+    expect(box!.height).toBeLessThan(900 * 1.5)
   })
 
   test("hovering a project lets its world take over the section", async ({ page }) => {

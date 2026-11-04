@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react"
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion"
 import { ArrowUpRight, X } from "lucide-react"
 import { projects, type Project } from "../data/projects"
+import { clients } from "../data/clients"
 import { RESTING, WORLDS } from "./work/themes"
 import { CaseOverlay } from "./work/CaseOverlay"
 import { SitePreview } from "./work/SitePreview"
@@ -27,8 +28,6 @@ const HOVER_INTENT_MS = 350
  * the browser window in the Services section (32rem square × 68%) */
 const STAGE_SIZE = { width: 512, height: 348 }
 
-/** one entry per client (in work order) for the row under the grid */
-const clients = projects.filter((p) => p.client)
 
 type Rect = { left: number; top: number; width: number; height: number }
 
@@ -85,13 +84,15 @@ function Tile({
       <header className="flex items-center gap-2.5 border-b px-3.5 py-2.5" style={{ borderColor: `${w.tile.fg}1f` }}>
         <span className="font-mono text-[10px] opacity-50">{project.index}</span>
         <h3 className={`${w.font} truncate text-sm font-bold tracking-tight`}>{project.name}</h3>
-        <span
-          data-testid={`work-status-${project.id}`}
-          className="-rotate-3 shrink-0 px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.12em]"
-          style={{ background: live ? w.tile.accent : w.tile.fg, color: live ? "#111" : w.tile.bg }}
-        >
-          {project.status}
-        </span>
+        {project.status === "LIVE" && (
+          <span
+            data-testid={`work-status-${project.id}`}
+            className="-rotate-3 shrink-0 px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.12em]"
+            style={{ background: w.tile.accent, color: "#111" }}
+          >
+            {project.status}
+          </span>
+        )}
         <button
           type="button"
           onClick={onOpen}
@@ -345,46 +346,84 @@ export function SelectedWork() {
         </div>
 
         {/* the people behind the work — each name lights up its project */}
-        <div className="mt-8 flex flex-col gap-4 border-t border-current/15 pt-6 lg:flex-row lg:items-center lg:gap-10" onPointerLeave={() => setHovered(null)}>
-          <p className="shrink-0 font-mono text-[11px] uppercase tracking-[0.15em]">
-            <span className="opacity-60">clients</span>
-            <span className="block text-sm font-bold normal-case tracking-normal">we've built for</span>
-          </p>
-          <ul className="flex flex-wrap items-center gap-x-7 gap-y-3 xl:gap-x-8">
-            {clients.map((p, i) => {
-              const on = activeId === p.id
+        <div className="mt-8" onPointerLeave={() => setHovered(null)}>
+          <div className="flex flex-wrap items-end justify-between gap-3 font-mono text-[11px] uppercase tracking-[0.15em]">
+            <p>
+              <span className="opacity-60">clients</span>
+              <span className="block text-sm font-bold normal-case tracking-normal">companies we've built for</span>
+            </p>
+            <p className="flex items-center gap-2 opacity-70">
+              <span className="inline-block h-2 w-2 rounded-full bg-current" aria-hidden="true" />
+              dot = see their project
+            </p>
+          </div>
+          <ul data-testid="clients" className="mt-4 grid grid-cols-2 border-l border-t border-current/15 sm:grid-cols-3 lg:grid-cols-6">
+            {clients.map((c, i) => {
+              const project = c.project ? projects.find((p) => p.id === c.project) : undefined
+              const on = project !== undefined && activeId === project.id
               const faded = activeId !== null && !on
+              const cell = "flex h-full min-h-[4.5rem] w-full flex-col justify-between gap-2 px-4 py-3 text-left"
+              const name = (
+                <span className="block">
+                  <span className="block font-grotesk text-[clamp(1.05rem,1.45vw,1.35rem)] font-bold leading-tight tracking-tight">{c.name}</span>
+                  {c.suffix && <span className="mt-1 block font-mono text-[10px] uppercase tracking-[0.15em] opacity-60">{c.suffix}</span>}
+                </span>
+              )
               return (
                 <motion.li
-                  key={p.id}
+                  key={c.name}
+                  data-testid={`client-${c.name.toLowerCase().replace(/\s+/g, "-")}`}
                   initial={reduced ? false : { opacity: 0, y: 14 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, amount: 0.6 }}
-                  transition={{ duration: 0.5, delay: i * 0.07, ease: [0.16, 1, 0.3, 1] }}
+                  viewport={{ once: true, amount: 0.4 }}
+                  transition={{ duration: 0.5, delay: i * 0.04, ease: [0.16, 1, 0.3, 1] }}
+                  className={`border-b border-r border-current/15 transition-opacity duration-300 ${faded ? "opacity-35" : ""}`}
                 >
-                  <button
-                    type="button"
-                    data-testid={`client-${p.id}`}
-                    aria-label={`${p.client} — see the project`}
-                    onPointerEnter={() => setHovered(p.id)}
-                    onFocus={() => setHovered(p.id)}
-                    onBlur={() => setHovered(null)}
-                    onClick={() => {
-                      closeStage()
-                      setOpen(p)
-                    }}
-                    className={`group flex items-center gap-2.5 transition-[opacity,transform] duration-300 hover:-translate-y-0.5 ${faded ? "opacity-30" : "opacity-90 hover:opacity-100"}`}
-                  >
-                    <span
-                      aria-hidden="true"
-                      className={`h-2.5 w-2.5 rounded-full transition-transform duration-300 ${on ? "scale-150" : ""}`}
-                      style={{ background: WORLDS[p.id].tile.accent }}
-                    />
-                    <span className={`${WORLDS[p.id].font} text-[clamp(1.2rem,1.9vw,1.75rem)] font-bold leading-none tracking-tight`}>{p.client}</span>
-                  </button>
+                  {project ? (
+                    <button
+                      type="button"
+                      aria-label={`${c.name} — see the project`}
+                      onPointerEnter={() => setHovered(project.id)}
+                      onFocus={() => setHovered(project.id)}
+                      onBlur={() => setHovered(null)}
+                      onClick={() => {
+                        closeStage()
+                        setOpen(project)
+                      }}
+                      className={`group ${cell} transition-colors hover:bg-current/[0.06]`}
+                    >
+                      <span className="flex w-full items-center justify-between font-mono text-[10px] opacity-60">
+                        {String(i + 1).padStart(2, "0")}
+                        <span
+                          aria-hidden="true"
+                          className={`h-2.5 w-2.5 rounded-full transition-transform duration-300 ${on ? "scale-150" : ""}`}
+                          style={{ background: WORLDS[project.id].tile.accent }}
+                        />
+                      </span>
+                      {name}
+                    </button>
+                  ) : (
+                    <div className={cell}>
+                      <span className="font-mono text-[10px] opacity-60">{String(i + 1).padStart(2, "0")}</span>
+                      {name}
+                    </div>
+                  )}
                 </motion.li>
               )
             })}
+            <li className="border-b border-r border-current/15">
+              <a
+                href="#contact"
+                data-testid="client-you"
+                className="group flex h-full min-h-[4.5rem] flex-col justify-between gap-2 px-4 py-3 transition-colors hover:bg-accent hover:text-white"
+              >
+                <span className="font-mono text-[10px] opacity-60">{String(clients.length + 1).padStart(2, "0")}</span>
+                <span className="flex items-center gap-1 font-serif text-[clamp(1.05rem,1.45vw,1.35rem)] italic leading-tight">
+                  your company?
+                  <ArrowUpRight size={16} className="transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                </span>
+              </a>
+            </li>
           </ul>
         </div>
       </div>
