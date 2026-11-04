@@ -20,23 +20,28 @@ Category: Education, Company Website. The website for Chinar Scientific
 Industries, a STEM, ICT and EdTech solutions partner for schools across
 India since 1984. Live at https://chinarscientific.in/
 
-## WhatsApp Marketing Platform (CASE STUDY)
+## WhatsApp Marketing Platform
 Category: Healthcare, SaaS Platform. Campaign and appointment management
 for healthcare clients, delivering WhatsApp campaigns to 500,000 to
 1,000,000+ recipients on auto-scaling AWS infrastructure. Built with
 Node.js, React, PostgreSQL, MongoDB, Redis and the WhatsApp Cloud API.
 
-## Spark ERP (CASE STUDY)
+## Spark ERP
 Category: Enterprise, ERP System. One centralized ERP, on web and mobile,
 for academics, students, exams, HR and finance. Built with React, React
 Native, Node.js and MongoDB.
 
-## Threat Accordme (CASE STUDY)
+## Threat Accordme
 Category: Education, Learning Platform. A learning management system with
 role-based access for admins, authors and learners. Built with React,
 Node.js and MySQL.
 
-## CTF Platform (CASE STUDY)
+## CTF Platform
 Category: Cybersecurity, Challenge App. A real-time capture-the-flag
 platform with live challenges, submissions and a leaderboard over
 WebSockets. Built with React, Node.js, MySQL and Firebase Auth.
+
+## Clients
+Companies we have built for: Ambrane India, BodhBox, Chinar Scientific,
+IPAD Pvt Ltd, MV Manpower Pvt Ltd, Occttro Fashion Pvt Ltd, Samagyo Pvt Ltd,
+SkillXploit, Spark, Srikara and ToyBharat.

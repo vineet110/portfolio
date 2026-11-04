@@ -14,8 +14,6 @@ export type Project = {
   status: "LIVE" | "CASE STUDY"
   description: string
   tags: string[]
-  /** the client this was built for — shown in the "clients" row under the work */
-  client?: string
   /** public address, when the project has one */
   url?: string
   preview: Preview
@@ -34,7 +32,6 @@ export const projects: Project[] = [
     id: "tufger",
     index: "01",
     name: "Tufger",
-    client: "Tufger",
     category: "Sports · Web App",
     status: "LIVE",
     description: "A turf booking manager that splits every booking and collects each player's share over UPI — no chasing anyone for money.",
@@ -47,7 +44,6 @@ export const projects: Project[] = [
     id: "jewellery",
     index: "02",
     name: "Jewellery Store",
-    client: "Jewellery Store",
     category: "Commerce · Website",
     status: "LIVE",
     description: "An online store for hallmarked gold, silver and diamond jewellery — temple, kundan and bridal pieces, delivered insured across India.",
@@ -60,7 +56,6 @@ export const projects: Project[] = [
     id: "chinar",
     index: "03",
     name: "Chinar Scientific",
-    client: "Chinar Scientific",
     category: "Education · Company Website",
     status: "LIVE",
     description: "The website for Chinar Scientific Industries — STEM, ICT and EdTech solutions for schools across India since 1984.",
@@ -84,7 +79,6 @@ export const projects: Project[] = [
     id: "spark-erp",
     index: "05",
     name: "Spark ERP",
-    client: "Spark",
     category: "Enterprise · ERP System",
     status: "CASE STUDY",
     description: "One centralized ERP — on web and mobile — for academics, students, exams, HR and finance.",
@@ -96,7 +90,6 @@ export const projects: Project[] = [
     id: "threat-accordme",
     index: "06",
     name: "Threat Accordme",
-    client: "BodhBox",
     category: "Education · Learning Platform",
     status: "CASE STUDY",
     description: "A learning management system with role-based access for admins, authors and learners.",
@@ -108,7 +101,6 @@ export const projects: Project[] = [
     id: "ctf",
     index: "07",
     name: "CTF Platform",
-    client: "SkillXploit",
     category: "Cybersecurity · Challenge App",
     status: "CASE STUDY",
     description: "A real-time capture-the-flag platform — live challenges, submissions and a leaderboard over WebSockets.",

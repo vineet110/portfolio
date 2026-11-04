@@ -51,12 +51,14 @@ export function CaseOverlay({ project, onClose }: { project: Project; onClose: (
       >
         <div className="relative h-[60svh] min-h-72 lg:h-[min(40rem,80svh)]">
           <SitePreview project={project} />
-          <span
-            className="pointer-events-none absolute left-4 top-4 -rotate-3 px-2.5 py-1 font-mono text-[11px] font-bold uppercase tracking-[0.15em]"
-            style={{ background: w.tile.fg, color: w.tile.bg }}
-          >
-            {project.status}
-          </span>
+          {project.status === "LIVE" && (
+            <span
+              className="pointer-events-none absolute left-4 top-4 -rotate-3 px-2.5 py-1 font-mono text-[11px] font-bold uppercase tracking-[0.15em]"
+              style={{ background: w.tile.fg, color: w.tile.bg }}
+            >
+              {project.status}
+            </span>
+          )}
         </div>
 
         <div className="flex flex-col p-6 sm:p-8">
