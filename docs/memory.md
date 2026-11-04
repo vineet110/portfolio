@@ -3,6 +3,41 @@
 This document reflects the actual state of the project right now. See
 `docs/goal.md` for the long-term vision this state is working toward.
 
+## Status (2026-11-04): real work, "try it" app builder, clients wall
+
+Branch `portfolio_n`. PR #1 (real work + app builder) is merged into
+`main`; PR #2 (clients wall + tag cleanup) is open.
+
+- **01 Work** (`sections/SelectedWork.tsx`, `data/projects.ts`): seven
+  real projects — 3 live sites (Tufger, Jewellery Store, Chinar Scientific)
+  and 4 platforms (WhatsApp Marketing, Spark ERP, Threat Accordme, CTF).
+  Resting on a tile grows it into a 512×348 window showing the live site
+  (or a full-page shot). Only LIVE projects show a status tag; the
+  "CASE STUDY" tag is no longer displayed (tiles and case overlay).
+- **Clients wall** (`data/clients.ts`, rendered under the work grid): a
+  numbered A–Z grid, 6 across on desktop / 3 tablet / 2 mobile, ending in a
+  "your company?" cell linking to #contact. Current list (11): Ambrane
+  India, BodhBox, Chinar Scientific, IPAD Pvt Ltd, MV Manpower Pvt Ltd,
+  Occttro Fashion Pvt Ltd, Samagyo Pvt Ltd, SkillXploit, Spark, Srikara,
+  ToyBharat. A client with `project` set gets a coloured dot; hovering
+  lights up that project, clicking opens its case. Tufger and Jewellery
+  Store are deliberately not on the wall. To add a client: one line in
+  `clients.ts` (and the list in `backend/app/knowledge/work.md`).
+- **03 "Build your app"** (`sections/AppBuilder.tsx` + `sections/builder/`)
+  replaced "Under the hood" (`Stack.tsx` deleted). Visitors pick any
+  business (12 presets or type their own), colour, style and features,
+  then launch: countdown → particle swarm → live app on a phone + laptop
+  with a visitor counter. The finale's "Build this for real" pre-fills the
+  contact sheet (`prefillIdea()` in `lib/scroll.ts`). Week estimates in
+  `builder/data.ts` are placeholders until the owner confirms them.
+- **Nav / footer / ⌘K**: "process" link renamed **"try it"** → `#build`.
+- **Assistant knowledge** (`work.md`) lists the clients; no "case study"
+  labels.
+- **Verification**: `npm run build` + `npm run lint` clean, Playwright
+  61/61. Backend pytest not re-run (pytest not installed on this machine).
+- `frontend/package-lock.json` has local, uncommitted version bumps from
+  `npm install` (oxc/rolldown tooling only) — not part of any PR.
+
 ## Status (2026-10-23): Phase V4 — showcase polish + streaming assistant (local, not yet deployed)
 
 Repo moved to GitHub (`github.com/vineet110/portfolio`, branch `main`) with a
