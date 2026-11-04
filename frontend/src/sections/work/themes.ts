@@ -1,7 +1,6 @@
 /**
- * Every concept project is its own "world" — its own palette and type —
- * so the Work section reads as many different products side by side.
- * `tile` styles the project's mini-site; `takeover` is what the whole
+ * Every project brings its own palette and type, taken from the product
+ * itself. `tile` dresses the project's card; `takeover` is what the whole
  * section turns into while that project is hovered or focused.
  */
 export type WorldTheme = {
@@ -11,33 +10,43 @@ export type WorldTheme = {
   font: string
 }
 
-/** The section's resting state: graphite, continuing the dark site — the worlds bring the colour. */
+/** The section's resting state: graphite, continuing the dark site — the work brings the colour. */
 export const RESTING: WorldTheme["takeover"] = { bg: "#18171f", fg: "#f3f0ea" }
 
 export const WORLDS: Record<string, WorldTheme> = {
-  "ai-workspace": {
-    tile: { bg: "#121019", fg: "#ece9f5", accent: "#9b87ff" },
-    takeover: { bg: "#1b1533", fg: "#ece9f5" },
-    font: "font-sans",
+  tufger: {
+    tile: { bg: "#0f2a1c", fg: "#eef7d8", accent: "#c6f432" },
+    takeover: { bg: "#123323", fg: "#eef7d8" },
+    font: "font-grotesk",
   },
-  maison: {
-    tile: { bg: "#efe6d8", fg: "#2a2118", accent: "#8a5a2b" },
-    takeover: { bg: "#d8c6aa", fg: "#2a2118" },
+  jewellery: {
+    tile: { bg: "#4a1528", fg: "#f7efe6", accent: "#d4b06a" },
+    takeover: { bg: "#5a1a31", fg: "#f7efe6" },
     font: "font-serif",
   },
-  pulse: {
-    tile: { bg: "#030806", fg: "#3dff9a", accent: "#ff4d6d" },
-    takeover: { bg: "#06160e", fg: "#c9ffe2" },
+  chinar: {
+    tile: { bg: "#0b3a75", fg: "#f2f6fb", accent: "#e0b90f" },
+    takeover: { bg: "#0d4489", fg: "#f2f6fb" },
+    font: "font-sans",
+  },
+  whatsapp: {
+    tile: { bg: "#0b1a17", fg: "#dcfce7", accent: "#25d366" },
+    takeover: { bg: "#0f2a22", fg: "#dcfce7" },
+    font: "font-sans",
+  },
+  "spark-erp": {
+    tile: { bg: "#eef2fb", fg: "#1b2340", accent: "#6d8bf2" },
+    takeover: { bg: "#dfe6fa", fg: "#1b2340" },
+    font: "font-grotesk",
+  },
+  "threat-accordme": {
+    tile: { bg: "#f4f2ff", fg: "#241b4d", accent: "#7c3aed" },
+    takeover: { bg: "#e4defe", fg: "#241b4d" },
+    font: "font-display",
+  },
+  ctf: {
+    tile: { bg: "#0d0b1f", fg: "#e7e3ff", accent: "#8b5cf6" },
+    takeover: { bg: "#1a1438", fg: "#e7e3ff" },
     font: "font-mono",
-  },
-  atlas: {
-    tile: { bg: "#ff6b4a", fg: "#1d0f0b", accent: "#fff3e6" },
-    takeover: { bg: "#ff8466", fg: "#1d0f0b" },
-    font: "font-grotesk",
-  },
-  flow: {
-    tile: { bg: "#e4ff4f", fg: "#11140a", accent: "#2b2bff" },
-    takeover: { bg: "#cdea2c", fg: "#11140a" },
-    font: "font-grotesk",
   },
 }

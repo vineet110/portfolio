@@ -23,38 +23,8 @@ export type MediaAsset = {
 const local = (file: string) => `/images/${file}`
 
 export const media = {
-  /**
-   * V3 hero: floating "app windows" built from the same project images
-   * used in the Work section below — the hero previews the real work
-   * directly (via `data/projects.ts`) rather than a separate image set.
-   */
-  projects: {
-    aiWorkspace: {
-      src: local("project-ai-workspace.webp"),
-      source: "Unsplash" as const,
-      alt: "Macro detail of a computer circuit board representing an intelligent systems interface",
-    },
-    maison: {
-      src: local("project-maison.webp"),
-      source: "Wikimedia Commons" as const,
-      alt: "Minimal symmetrical hotel lobby interior with soft directional light",
-    },
-    pulse: {
-      src: local("project-pulse.webp"),
-      source: "Wikimedia Commons" as const,
-      alt: "Nighttime satellite view of a dense city's illuminated street network, evoking live financial data",
-    },
-    atlas: {
-      src: local("project-atlas.webp"),
-      source: "Wikimedia Commons" as const,
-      alt: "Aerial view of a coastal resort skyline suggesting travel and hospitality",
-    },
-    flow: {
-      src: local("project-flow.webp"),
-      source: "Unsplash" as const,
-      alt: "Overhead view of a triple-monitor developer workstation, symmetrical and dark",
-    },
-  },
+  // Work images are screenshots of the team's own projects and live in
+  // public/images/work/, declared alongside each project in data/projects.ts.
 
   capabilities: {
     web: {

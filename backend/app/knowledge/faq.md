@@ -46,13 +46,14 @@ start to finish.
 Yes — a dedicated team takes your idea from concept to launch.
 
 ## Can I see your work?
-Yes — the Work section on the site. These are studio-built concept and
-experimental projects, clearly labeled CONCEPT or EXPERIMENTAL.
+Yes — the Work section on the site. Three of the projects are live
+websites (Tufger, Jewellery Store and Chinar Scientific) that open at full
+size right on the page; four more are platforms shown with product shots.
 
 ## Are these real client projects?
-No. The current portfolio is studio-built concept and experimental work,
-not real client engagements. Real client work will be added and clearly
-marked as such once it exists.
+Yes — they're real projects built by our team. Three are live websites
+you can open right on the site; the other four are platforms without a
+public address, shown with product shots.
 
 ## How can I contact you?
 Use the contact form on the site, or reach out directly on WhatsApp for a

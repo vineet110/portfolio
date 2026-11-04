@@ -19,6 +19,5 @@ handed off between separate vendors at each stage.
 ## What we don't claim
 We don't publish client lists, revenue figures, team size, statistics,
 testimonials, or awards, because none of that exists yet in a form we're
-willing to put in front of people. The portfolio on this site is made up of
-studio-built concept and experimental projects, not real client
-engagements, and every one of them is clearly labeled as such.
+willing to put in front of people. The portfolio on this site shows real
+projects built by our team: three live websites and four platforms.

@@ -1,80 +1,119 @@
-import { media } from "./media"
+export type Preview =
+  /** the real site, running inside the page */
+  | { kind: "live" }
+  /** the site blocks embedding (X-Frame-Options), so a full-page screenshot scrolls instead */
+  | { kind: "scroll"; src: string }
+  /** no public URL — a product shot */
+  | { kind: "image" }
 
 export type Project = {
   id: string
   index: string
   name: string
   category: string
-  status: "CONCEPT" | "EXPERIMENTAL"
+  status: "LIVE" | "CASE STUDY"
   description: string
   tags: string[]
-  /** Decorative page labels shown in the project's browser-chrome preview —
-   * not real navigable pages (these are concept explorations, not live
-   * sites), just part of the visual presentation. */
-  pages: string[]
-  image: (typeof media.projects)[keyof typeof media.projects]
+  /** the client this was built for — shown in the "clients" row under the work */
+  client?: string
+  /** public address, when the project has one */
+  url?: string
+  preview: Preview
+  /** resting image on the tile (and while a live site loads) */
+  image: { src: string; alt: string }
 }
 
+const img = (file: string) => `/images/work/${file}`
+
 /**
- * Conceptual portfolio projects. These are studio-authored explorations,
- * not real client engagements — always labeled CONCEPT / EXPERIMENTAL in UI,
- * never given a fake "live site" link. Names are placeholders and can be
- * replaced once real work exists.
+ * Work made by the team. The first three are live websites; the rest are
+ * platforms without a public address, shown with product shots.
  */
 export const projects: Project[] = [
   {
-    id: "ai-workspace",
+    id: "tufger",
     index: "01",
-    name: "AI Workspace",
-    category: "AI Product · Web App",
-    status: "CONCEPT",
-    description: "An operations console that turns scattered business data into one conversational workspace.",
-    tags: ["Web App", "AI-Integrated", "UI/UX"],
-    pages: ["Home", "Workspace", "Reports"],
-    image: media.projects.aiWorkspace,
+    name: "Tufger",
+    client: "Tufger",
+    category: "Sports · Web App",
+    status: "LIVE",
+    description: "A turf booking manager that splits every booking and collects each player's share over UPI — no chasing anyone for money.",
+    tags: ["Web App", "UPI Payments", "Booking"],
+    url: "https://tufger.vercel.app",
+    preview: { kind: "live" },
+    image: { src: img("tufger.jpg"), alt: "Tufger sign-in screen: a dark green pitch with an amber scoreboard-style passcode panel" },
   },
   {
-    id: "maison",
+    id: "jewellery",
     index: "02",
-    name: "Maison",
+    name: "Jewellery Store",
+    client: "Jewellery Store",
     category: "Commerce · Website",
-    status: "CONCEPT",
-    description: "A quiet, confident storefront for a heritage goods house — pacing over pop-ups.",
-    tags: ["Website", "E-commerce", "Art Direction"],
-    pages: ["Home", "Shop", "Story"],
-    image: media.projects.maison,
+    status: "LIVE",
+    description: "An online store for hallmarked gold, silver and diamond jewellery — temple, kundan and bridal pieces, delivered insured across India.",
+    tags: ["E-commerce", "Website", "Catalogue & Cart"],
+    url: "https://jewellery-store-orcin.vercel.app/",
+    preview: { kind: "scroll", src: img("jewellery-full.jpg") },
+    image: { src: img("jewellery.jpg"), alt: "Jewellery Store home page: a gold kundan necklace beside the headline 'Jewellery made to be handed down'" },
   },
   {
-    id: "pulse",
+    id: "chinar",
     index: "03",
-    name: "Pulse",
-    category: "Fintech · Web App",
-    status: "EXPERIMENTAL",
-    description: "A trading interface that keeps dense, real-time data legible under pressure.",
-    tags: ["Web App", "Data-Heavy UI", "UX"],
-    pages: ["Dashboard", "Markets", "Portfolio"],
-    image: media.projects.pulse,
+    name: "Chinar Scientific",
+    client: "Chinar Scientific",
+    category: "Education · Company Website",
+    status: "LIVE",
+    description: "The website for Chinar Scientific Industries — STEM, ICT and EdTech solutions for schools across India since 1984.",
+    tags: ["Website", "Corporate", "Education"],
+    url: "https://chinarscientific.in/",
+    preview: { kind: "live" },
+    image: { src: img("chinar.jpg"), alt: "Chinar Scientific home page: 'Innovating Education Since 1984' on a deep blue banner" },
   },
   {
-    id: "atlas",
+    id: "whatsapp",
     index: "04",
-    name: "Atlas",
-    category: "Travel · Mobile App",
-    status: "CONCEPT",
-    description: "A booking app for boutique stays, built around discovery rather than a checkout funnel.",
-    tags: ["Mobile App", "Booking", "UI/UX"],
-    pages: ["Explore", "Stay", "Trip"],
-    image: media.projects.atlas,
+    name: "WhatsApp Marketing Platform",
+    category: "Healthcare · SaaS Platform",
+    status: "CASE STUDY",
+    description: "Campaign and appointment management for healthcare clients, delivering WhatsApp campaigns to 500,000–1,000,000+ recipients on auto-scaling AWS infrastructure.",
+    tags: ["AWS", "Node.js", "React", "WhatsApp Cloud API"],
+    preview: { kind: "image" },
+    image: { src: img("spark-ai.jpg"), alt: "Dark, glowing product screen with an AI assistant robot and campaign navigation" },
   },
   {
-    id: "flow",
+    id: "spark-erp",
     index: "05",
-    name: "Flow",
-    category: "Automation · Web App",
-    status: "EXPERIMENTAL",
-    description: "A visual tool for non-technical teams to compose their own business logic, AI-assisted.",
-    tags: ["Web App", "AI-Integrated", "Internal Tool"],
-    pages: ["Canvas", "Runs", "Settings"],
-    image: media.projects.flow,
+    name: "Spark ERP",
+    client: "Spark",
+    category: "Enterprise · ERP System",
+    status: "CASE STUDY",
+    description: "One centralized ERP — on web and mobile — for academics, students, exams, HR and finance.",
+    tags: ["React", "React Native", "Node.js", "MongoDB"],
+    preview: { kind: "image" },
+    image: { src: img("spark.jpg"), alt: "Spark ERP dashboard on a desktop monitor: student counts, attendance chart and calendar" },
+  },
+  {
+    id: "threat-accordme",
+    index: "06",
+    name: "Threat Accordme",
+    client: "BodhBox",
+    category: "Education · Learning Platform",
+    status: "CASE STUDY",
+    description: "A learning management system with role-based access for admins, authors and learners.",
+    tags: ["React", "Node.js", "MySQL", "RBAC"],
+    preview: { kind: "image" },
+    image: { src: img("bodhbox.jpg"), alt: "Learning platform admin dashboard with user management and analytics cards" },
+  },
+  {
+    id: "ctf",
+    index: "07",
+    name: "CTF Platform",
+    client: "SkillXploit",
+    category: "Cybersecurity · Challenge App",
+    status: "CASE STUDY",
+    description: "A real-time capture-the-flag platform — live challenges, submissions and a leaderboard over WebSockets.",
+    tags: ["React", "Node.js", "WebSockets", "Firebase Auth"],
+    preview: { kind: "image" },
+    image: { src: img("skillxploit.jpg"), alt: "CTF admin dashboard on a monitor: users, live competitions and recent flag captures" },
   },
 ]

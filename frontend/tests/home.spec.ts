@@ -39,7 +39,7 @@ test.describe("Navigation", () => {
     const nav = page.locator("header nav")
     await expect(nav.getByRole("link", { name: "work", exact: true })).toBeVisible()
     await expect(nav.getByRole("link", { name: "services" })).toBeVisible()
-    await expect(nav.getByRole("link", { name: "process" })).toBeVisible()
+    await expect(nav.getByRole("link", { name: "try it" })).toBeVisible()
     await expect(nav.getByRole("link", { name: "contact" })).toBeVisible()
 
     const connect = nav.getByRole("link", { name: /let's connect/i })
@@ -123,6 +123,20 @@ test.describe("Hero", () => {
 })
 
 test.describe("Work", () => {
+  test("lists the clients; hovering one lights up its project, clicking opens it", async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 })
+    await page.goto("/")
+    const work = page.locator("#work")
+    for (const id of ["tufger", "jewellery", "chinar", "spark-erp", "threat-accordme", "ctf"]) {
+      await expect(work.getByTestId(`client-${id}`)).toBeAttached()
+    }
+    await work.getByTestId("client-chinar").scrollIntoViewIfNeeded()
+    await work.getByTestId("client-chinar").hover()
+    await expect(work.getByText("Education · Company Website").first()).toBeVisible()
+    await work.getByTestId("client-chinar").click()
+    await expect(page.getByRole("dialog")).toContainText("Chinar Scientific")
+  })
+
   async function gotoWork(page: import("@playwright/test").Page) {
     await page.setViewportSize({ width: 1440, height: 900 })
     await page.goto("/")
@@ -131,27 +145,27 @@ test.describe("Work", () => {
     return page.locator("#work")
   }
 
-  test("keeps the honest framing: made by our team, not real client work", async ({ page }) => {
+  test("says the work is made by the team, and shows what's live", async ({ page }) => {
     const section = await gotoWork(page)
     await expect(section.getByText(/made by our team/i)).toBeVisible()
-    await expect(section.getByText(/not real client work/i)).toBeVisible()
+    await expect(section.getByText(/3 live sites · 4 platforms/i)).toBeVisible()
   })
 
-  test("shows all five projects at once, each labelled CONCEPT or EXPERIMENTAL, on one screen", async ({ page }) => {
+  test("shows all seven projects on one screen, live sites labelled LIVE", async ({ page }) => {
     const section = await gotoWork(page)
-    const expected: Record<string, string> = {
-      "ai-workspace": "CONCEPT",
-      maison: "CONCEPT",
-      pulse: "EXPERIMENTAL",
-      atlas: "CONCEPT",
-      flow: "EXPERIMENTAL",
+    const expected: Record<string, [string, string]> = {
+      tufger: ["Tufger", "LIVE"],
+      jewellery: ["Jewellery Store", "LIVE"],
+      chinar: ["Chinar Scientific", "LIVE"],
+      whatsapp: ["WhatsApp Marketing Platform", "CASE STUDY"],
+      "spark-erp": ["Spark ERP", "CASE STUDY"],
+      "threat-accordme": ["Threat Accordme", "CASE STUDY"],
+      ctf: ["CTF Platform", "CASE STUDY"],
     }
-    for (const [id, status] of Object.entries(expected)) {
+    for (const [id, [name, status]] of Object.entries(expected)) {
       await expect(section.getByTestId(`work-tile-${id}`)).toBeInViewport()
       await expect(section.getByTestId(`work-status-${id}`)).toHaveText(status)
-    }
-    for (const name of ["AI Workspace", "Maison", "Pulse", "Atlas", "Flow"]) {
-      await expect(section.getByRole("heading", { level: 3, name, exact: true })).toBeVisible()
+      await expect(section.getByTestId(`work-tile-${id}`).getByRole("heading", { level: 3, name, exact: true })).toBeVisible()
     }
   })
 
@@ -164,29 +178,57 @@ test.describe("Work", () => {
   test("hovering a project lets its world take over the section", async ({ page }) => {
     const section = await gotoWork(page)
     const before = await section.evaluate((el) => getComputedStyle(el).backgroundColor)
-    await section.getByTestId("work-tile-maison").hover()
+    await section.getByTestId("work-tile-jewellery").hover()
     await expect
       .poll(() => section.evaluate((el) => getComputedStyle(el).backgroundColor))
       .not.toBe(before)
   })
 
-  test("the mini-sites are interactive (Maison's bag fills up)", async ({ page }) => {
+  test("resting on a live project grows it into a full-size window running the real site", async ({ page }) => {
     const section = await gotoWork(page)
-    const maison = section.getByTestId("work-tile-maison")
-    await maison.getByRole("button", { name: "Add to bag" }).click()
-    await expect(maison.getByText("Added to bag ✓")).toBeVisible()
-    await expect(maison.getByText("Bag (1)")).toBeVisible()
+    const tile = section.getByTestId("work-tile-tufger")
+    const tileBox = await tile.boundingBox()
+    await tile.hover()
+
+    const stage = section.getByTestId("work-stage")
+    await expect(stage).toBeVisible()
+    await expect(stage.getByRole("heading", { name: "Tufger" })).toBeVisible()
+    // grows into a 512 × 348 window (the Services browser window's size), bigger than the tile
+    await expect.poll(async () => Math.round((await stage.boundingBox())!.width)).toBe(512)
+    await expect.poll(async () => Math.round((await stage.boundingBox())!.height)).toBe(348)
+    expect(512).toBeGreaterThan(tileBox!.width)
+    // the real site, rendered at desktop width inside
+    const frame = stage.locator("iframe")
+    await expect(frame).toHaveAttribute("src", "https://tufger.vercel.app")
+    await expect(frame).toHaveCSS("width", "1440px")
+    await expect(stage.getByRole("link", { name: /visit site/i })).toHaveAttribute("href", "https://tufger.vercel.app")
+
+    // moving off the work closes it
+    await page.mouse.move(5, 5)
+    await expect(stage).toHaveCount(0)
   })
 
-  test("open case shows an honest, keyboard-friendly case view", async ({ page }) => {
+  test("a site that blocks embedding scrolls as a full-page screenshot instead", async ({ page }) => {
     const section = await gotoWork(page)
-    const opener = section.getByTestId("work-open-pulse")
-    await opener.click()
+    await section.getByTestId("work-tile-jewellery").hover()
+    const stage = section.getByTestId("work-stage")
+    await expect(stage).toBeVisible()
+    await expect(stage.locator("iframe")).toHaveCount(0)
+    await expect(stage.locator('img[src="/images/work/jewellery-full.jpg"]')).toBeVisible()
+    await page.keyboard.press("Escape")
+    await expect(stage).toHaveCount(0)
+  })
 
-    const dialog = page.getByRole("dialog", { name: "Pulse" })
+  test("open shows a keyboard-friendly case view", async ({ page }) => {
+    const section = await gotoWork(page)
+    const opener = section.getByTestId("work-open-chinar")
+    await opener.focus()
+    await page.keyboard.press("Enter")
+
+    const dialog = page.getByRole("dialog", { name: "Chinar Scientific" })
     await expect(dialog).toBeVisible()
-    await expect(dialog.getByText("EXPERIMENTAL", { exact: true })).toBeVisible()
-    await expect(dialog.getByText(/concept exploration — not a live client site/i)).toBeVisible()
+    await expect(dialog.getByText("LIVE", { exact: true })).toBeVisible()
+    await expect(dialog.getByRole("link", { name: /visit the live site/i })).toHaveAttribute("href", "https://chinarscientific.in/")
     await expect(dialog.getByRole("button", { name: "Close case" })).toBeFocused()
 
     await page.keyboard.press("Escape")
@@ -245,29 +287,62 @@ test.describe("Services", () => {
   })
 })
 
-test.describe("Under the hood", () => {
-  test("shows the site's real stack as five layers, with a live API check and no vendor names", async ({ page }) => {
+test.describe("Build your app", () => {
+  test("picking a business builds the app, extras switch on, and launch takes it live", async ({ page }) => {
     await page.goto("/")
-    const section = page.locator("#stack")
+    const section = page.locator("#build")
     await section.scrollIntoViewIfNeeded()
+    await expect(section.getByTestId("launch")).toBeDisabled()
 
-    for (const name of ["Interface", "Assistant", "API", "Data", "Quality"]) {
-      await expect(section.getByRole("heading", { level: 3, name, exact: true })).toBeVisible()
-    }
-    await expect(section.getByTestId("api-status")).toContainText("api:")
-    await expect(section.getByText(/vercel|render|railway|aws|groq|openai|supabase|neon/i)).toHaveCount(0)
+    await section.getByTestId("biz-restaurant").click()
+    await expect(section.getByTestId("biz-restaurant")).toHaveAttribute("aria-pressed", "true")
+    await expect(section.getByTestId("app-phone")).toContainText("Spice Route")
+
+    await section.getByTestId("feature-payments").click()
+    await expect(section.getByTestId("feature-payments")).toHaveAttribute("aria-checked", "true")
+    await expect(section.getByTestId("receipt")).toContainText("Payments")
+    await expect(section.getByTestId("receipt-weeks")).toHaveText("≈ 4 weeks")
+
+    await section.getByTestId("launch").click()
+    const card = section.getByTestId("launch-card")
+    await expect(card).toBeVisible({ timeout: 10000 })
+    await expect(card).toContainText("Spice Route")
+    await expect(section.getByTestId("visitors")).toHaveText("10,000")
+
+    await card.getByRole("button", { name: /build this for real/i }).click()
+    await expect(page.locator("#message")).toHaveValue(/Spice Route.*payments/i)
+    await expect(page.locator("#project_type")).toHaveValue("website")
   })
 
-  test("hovering or focusing a layer makes it the active one", async ({ page }) => {
+  test("any business works: pick from the list or type your own", async ({ page }) => {
     await page.goto("/")
-    const section = page.locator("#stack")
+    const section = page.locator("#build")
     await section.scrollIntoViewIfNeeded()
+    await section.getByTestId("biz-gym").click()
+    await expect(section.getByTestId("app-phone")).toContainText("Iron Pulse")
 
-    await section.getByTestId("stack-layer-data").hover()
-    await expect(section.getByTestId("stack-layer-data")).toHaveAttribute("aria-pressed", "true")
-    await section.getByTestId("stack-layer-quality").focus()
-    await expect(section.getByTestId("stack-layer-quality")).toHaveAttribute("aria-pressed", "true")
-    await expect(section.getByTestId("stack-layer-data")).toHaveAttribute("aria-pressed", "false")
+    await section.getByTestId("biz-custom-input").fill("pet grooming")
+    await section.getByTestId("biz-custom-go").click()
+    await expect(section.getByTestId("app-phone")).toContainText("Pet Grooming")
+    await expect(section.getByTestId("receipt")).toContainText("Pet grooming app")
+  })
+
+  test("Surprise me builds and launches an app on its own", async ({ page }) => {
+    await page.goto("/")
+    const section = page.locator("#build")
+    await section.scrollIntoViewIfNeeded()
+    await section.getByTestId("surprise").click()
+    await expect(section.getByTestId("launch-card")).toBeVisible({ timeout: 20000 })
+  })
+
+  test("with reduced motion, launch goes straight to live", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" })
+    await page.goto("/")
+    const section = page.locator("#build")
+    await section.scrollIntoViewIfNeeded()
+    await section.getByTestId("biz-clinic").click()
+    await section.getByTestId("launch").click()
+    await expect(section.getByTestId("launch-card")).toContainText("CareWell")
   })
 })
 
@@ -292,7 +367,7 @@ test.describe("FAQ", () => {
     await page.goto("/")
     const all = page.locator("#faq dl")
     await expect(all.locator("dt")).toHaveCount(7)
-    await expect(all).toContainText("Are the projects in the Work section real client work?")
+    await expect(all).toContainText("Is the work in the Work section real?")
   })
 
   test("start over resets the conversation", async ({ page }) => {
@@ -326,11 +401,11 @@ test.describe("Process (told by the hero)", () => {
     expect(boardBox!.y).toBeGreaterThanOrEqual(navBox!.y + navBox!.height - 4)
   })
 
-  test("the nav's process link lands on the UI/UX stage", async ({ page }) => {
+  test("the nav's try it link lands on the build-your-app playground", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 })
     await page.goto("/")
-    await page.locator("header nav").getByRole("link", { name: "process" }).click()
-    await expect(page.locator("#top li[data-active] h3")).toContainText("UI/UX", { timeout: 4000 })
+    await page.locator("header nav").getByRole("link", { name: "try it" }).click()
+    await expect(page.locator("#build").getByRole("heading", { level: 2 })).toBeInViewport({ timeout: 4000 })
   })
 
   test("scrolling through the hero reaches every stage, ending on Launch with the deploy log live", async ({ page }) => {

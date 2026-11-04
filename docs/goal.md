@@ -106,12 +106,12 @@ consider embeddings then (deliberately not introduced yet).
 
 ## Site structure (MVP, single page)
 
-Navigation → Hero → Selected Work → Services → Process → Under the hood →
+Navigation → Hero → Selected Work → Services → Process → Build your app →
 FAQ → Final CTA → Footer. (The standalone "Studio Approach" section was
 removed — the dedicated-team message now lives as one line inside Process.)
 
-"Under the hood" shows only this site's own, real stack — never vendor or
-hosting names — and the FAQ must stay consistent with
+"Build your app" (sections/AppBuilder.tsx) lets visitors assemble a small
+demo app and launch it; its finale pre-fills the contact sheet. The FAQ must stay consistent with
 `backend/app/knowledge/faq.md`, so the page and the chatbot never disagree.
 Site-wide extras (⌘K command palette, preloader, cursor ring) are
 enhancements only: the page must work fully without them.

@@ -112,7 +112,7 @@ BUSINESS_DEFINITION_CASES = [
     ("What is your process?", ["idea", "launch"]),
     ("Do you have a team?", ["dedicated team"]),
     ("Can I see your work?", ["work"]),
-    ("Are these real client projects?", ["concept"]),
+    ("Are these real client projects?", ["live"]),
     ("How can I contact you?", ["contact form"]),
     ("Can I reach you on WhatsApp?", ["whatsapp"]),
     # Phase V3.2 — same business facts, the brief's exact rephrasings.
